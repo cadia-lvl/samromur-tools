@@ -1,0 +1,58 @@
+[
+    {
+        "tokenId": 14,
+        "recPath": "./recordings/audio/d47f35db-62b7-4f60-adff-6d36dbbc6a64.wav",
+        "recId": 14,
+        "token": "en ekki eru allir eiginleikar aðlaganir",
+        "valid": 0
+    },
+    {
+        "tokenId": 16,
+        "recPath": "./recordings/audio/a640d738-1282-4d56-8de2-af0319849a2a.wav",
+        "recId": 16,
+        "token": "slíkar upplausnir er hægt að fá í lyfjabúðum meðal annars sem úða",
+        "valid": 0
+    },
+    {
+        "tokenId": 18,
+        "recPath": "./recordings/audio/e14fec49-e783-4a4c-a156-58d04670faf1.wav",
+        "recId": 18,
+        "token": "aspir af balsamaspardeild eru oft votlendis tegundir",
+        "valid": 0
+    },
+    {
+        "tokenId": 19,
+        "recPath": "./recordings/audio/7090ab42-e497-408f-af18-7069ecb3c3ef.wav",
+        "recId": 19,
+        "token": "almenningsálitið olli því að reglugerðin var snarlega dregin til baka",
+        "valid": 0
+    },
+    {
+        "tokenId": 28,
+        "recPath": "./recordings/audio/5d536e8a-1a16-4927-8efa-3c1cc169d668.wav",
+        "recId": 28,
+        "token": "stundum fengu erfingjar hertoga þennan titil",
+        "valid": 0
+    },
+    {
+        "tokenId": 31,
+        "recPath": "./recordings/audio/5f0fe1bd-4d43-4fd3-a084-cfbac98b8b1c.wav",
+        "recId": 31,
+        "token": "massamiðjan ræðst af massa og staðsetningu agna í kerfinu og lögun kerfisins",
+        "valid": 0
+    },
+    {
+        "tokenId": 32,
+        "recPath": "./recordings/audio/8fd06561-a1ae-4be6-921c-4159b8ef80bb.wav",
+        "recId": 32,
+        "token": "hann tók við þegar jón árnason ábóti lést í plágunni síðari",
+        "valid": 0
+    },
+    {
+        "tokenId": 33,
+        "recPath": "./recordings/audio/708c12c7-a080-4e30-9410-556ddc96226c.wav",
+        "recId": 33,
+        "token": "þeir sem leggja stund á greinina kallast skordýrafræðingar",
+        "valid": 0
+    }
+]
