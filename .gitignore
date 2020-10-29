@@ -7,4 +7,17 @@ credentials.json
 reports/
 recordings/
 modules/local/
+modules/local_v1/
 
+training/data/
+
+training/scripts/conf/
+training/scripts/data/
+training/scripts/exp/
+training/scripts/utils
+training/scripts/steps
+training/scripts/cmd.sh
+training/scripts/path.sh
+training/scripts/mfcc
+
+training/model/

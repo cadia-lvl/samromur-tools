@@ -35,9 +35,9 @@ def normalize_and_prep_data(conf, n_acoustic):
 
     df = pd.read_csv(join(conf['metadata']), sep='\t', index_col='id')
 
-    if n_acoustic:
+    if conf['n_acoustic']:
         #Variables to limit the acustic data used. 
-        n = [n_acoustic, True, 0]
+        n = [conf['n_acoustic'], True, 1]
     else:
         n = [1, False, 0]
         
@@ -66,7 +66,7 @@ def normalize_and_prep_data(conf, n_acoustic):
 
     with open(token_file, 'w') as f_out:
         for tok in sorted(list(tokens)):
-            if not tok.isspace():
+            if len(tok) > 0:
                 f_out.write(tok+'\n')
 
     #We need to change location to run a sub script
@@ -75,8 +75,6 @@ def normalize_and_prep_data(conf, n_acoustic):
     subprocess.call(f'utils/validate_data_dir.sh --no-feats {data} || utils/fix_data_dir.sh {data}', cwd=scripts, shell=True)
 
     spk2utt.close()
-
-
 
 def create_phonemes_file():
     with open(phonemes_file, 'w') as f_out:
@@ -91,8 +89,7 @@ def create_phonemes_file():
 
 
 def run_g2p_on_tokens(conf):
-    tokens = [tok.rstrip() for tok in open(token_file)]
-    subprocess.call(f"g2p.py --apply {tokens} --model {conf['g2p_model']} --encoding='UTF-8' > {lexicon_file}")
+    subprocess.call(f"g2p.py --apply {token_file} --model {conf['g2p_model']} --encoding='UTF-8' > {lexicon_file}", shell=True)
     create_phonemes_file()
 
 def train_acoustic(conf):

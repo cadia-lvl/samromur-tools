@@ -25,7 +25,7 @@
 # the last couple of lines.
 
 nj=7
-stage=3
+stage=0
 
 LEXICON_PATH=$1
 PHONEME_PATH=$2
@@ -89,6 +89,6 @@ if [ $stage -le 3 ]; then
 
     ./local/lang_add_phones.sh data/local/dict/lexiconp.txt data/lang data/newlang
     ./local/make_phone_bigram_fst.sh exp/mono data/newlang local/my_phone_fst
-    ./local/prepare_model_folder.sh data/newlang exp/mono local/my_phone_fst 16000 "$LEXICON_PATH" model_path
+    ./local/prepare_model_folder.sh data/newlang exp/mono local/my_phone_fst 16000 "$LEXICON_PATH" $model_path
 
 fi

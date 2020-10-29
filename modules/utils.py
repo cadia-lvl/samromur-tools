@@ -14,13 +14,14 @@
 
 # File author/s:
 #     Matthias Petursson <oldschool01123@gmail.com>
-#
+#     David Erik Mollberg
 # utility functions for server-interface
 
 import sys
 import unicodedata
 import re
 import os
+
 
 from datetime import datetime
 from celery.utils.log import get_task_logger
@@ -72,3 +73,4 @@ def isWavHeaderOnly(wavAbsPath) -> bool:
         True if wav file contains only a wav header and no data (is 44 bytes)
     """
     return os.path.getsize(wavAbsPath) == 44
+

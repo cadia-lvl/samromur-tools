@@ -16,28 +16,22 @@
 #     Róbert Kjaran <robert@kjaran.com>
 
 import sh
-import tempfile
-from os import getcwd, environ, mkdir
+from os import  environ, mkdir, remove
 from os.path import join, dirname,  exists
-import re
-import sys
 from multiprocessing import Process
 from config import conf
-from modules.utils import simpleLog
 
-from modules.MarosijoModule import MarosijoCommon
+from modules.marosijoCommon import MarosijoCommon
 
-def genGraphs(tokensPath:list):
+def genGraphs(prompts:list):
     """
     Generate decoding graphs for each token for our Marosijo module.
-    
     Only needs to be run once (for each version of the tokens).
-
     Parameters:
-        tokensPath      path to the token list on format "tokId token"
+        prompts      path to the promtps list on format "tokId token"
     """
 
-    output_folder = join(getcwd(), 'modules', 'local')
+    output_folder = conf['model']
 
     if not exists(output_folder):
         mkdir(output_folder)
@@ -45,6 +39,12 @@ def genGraphs(tokensPath:list):
     graphsArkPath = join(output_folder, 'graphs.ark')
     graphsScpPath = join(output_folder, 'graphs.scp')
 
+    if exists(graphsArkPath):
+       remove(graphsArkPath)
+
+    if exists(graphsScpPath):
+       remove(graphsScpPath) 
+       
     common = MarosijoCommon(join('modules', 'local'), graphs=False)
 
     #: Shell commands
@@ -52,36 +52,29 @@ def genGraphs(tokensPath:list):
     
     fstEnv = environ.copy()
     fstEnv['PATH'] = '{}/tools/openfst/bin:{}'.format(conf['kaldi_root'], fstEnv['PATH'])
-    print(fstEnv['PATH'])
+
     makeUtteranceFsts = makeUtteranceFsts.bake(_env=fstEnv)
-    compileTrainGraphsFsts = sh.Command('{}/src/bin/compile-train-graphs-fsts'
-                                        .format(conf['kaldi_root']))
+    compileTrainGraphsFsts = sh.Command(f"{conf['kaldi_root']}/src/bin/compile-train-graphs-fsts")
 
     tokensLines = []
-    with open(tokensPath) as tokensF:
-        # These tok_keys should correspond to mysql id's
-        #   of tokens (because this is crucial, since the cleanup module relies
-        #   on the ids, we make sure to verify this by querying the database for each token
-        #   see util.DbWork)
-
-        for line in tokensF:
-            line = line.rstrip('\n')
-            #tokenKey = line.split(' ')[0]
-            #token = ' '.join(line.split(' ')[1:]) # split(' ') needed because split() rstrips the space by default
-            tokenKey, token = line.split('\t')
-            tokenInts = common.symToInt(token.lower())
-            tokensLines.append('{} {}'.format(tokenKey, tokenInts))
+    if type(prompts) == list:
+        tokensF = prompts
+    else:
+        tokensF = [p.rstrip('\n') for p in open(prompts)]
+    for line in tokensF:
+        tokenKey, token = line.split('\t')
+        tokenInts = common.symToInt(token.lower())
+        tokensLines.append('{} {}'.format(tokenKey, tokenInts))
             
-    simpleLog('Compiling the decoding graphs (files {} and {}).  This will take a long time.'
-              .format(graphsArkPath, graphsScpPath))
+    #simpleLog('Compiling the decoding graphs (files {} and {}).This step can take some time.'
+    #          .format(graphsArkPath, graphsScpPath))
 
     compileTrainGraphsFsts(
         makeUtteranceFsts(
             common.phoneLmPath,
             common.symbolTablePath,
             _in='\n'.join(tokensLines) + '\n',
-            _piped=True,
-            _err=simpleLog
+            _piped=True
         ),
         '--verbose=4',
         '--batch-size=1',
@@ -93,7 +86,6 @@ def genGraphs(tokensPath:list):
         common.lexiconFstPath,
         'ark:-',
         'ark,scp:{ark},{scp}'.format(ark=graphsArkPath,
-                                     scp=graphsScpPath),
-        _err=simpleLog
+                                     scp=graphsScpPath)
     )
 
