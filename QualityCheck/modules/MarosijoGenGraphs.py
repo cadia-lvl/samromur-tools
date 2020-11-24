@@ -84,6 +84,3 @@ def genGraphs(prompts:list, u_prefix):
         'ark,scp:{ark},{scp}'.format(ark=graphsArkPath,
                                      scp=graphsScpPath)
     )
-
-    
-

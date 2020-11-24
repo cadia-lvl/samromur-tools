@@ -1,3 +1,99 @@
-  0%|          | 0/6 [00:00<?, ? files/s] 17%|█▋        | 1/6 [00:24<02:01, 24.28s/ files] 33%|███▎      | 2/6 [00:33<01:18, 19.67s/ files]100%|██████████| 6/6 [00:33<00:00,  5.53s/ files]
-/home/dem/Projects/samromur-tools/QualityCheck/reports/small_test.json
-Run time 0.5568723320960999 min
+  0%|          | 0/5000 [00:00<?, ? files/s]  0%|          | 1/5000 [02:34<215:04:44, 154.89s/ files]  0%|          | 2/5000 [02:39<152:17:06, 109.69s/ files]  0%|          | 7/5000 [03:43<111:52:07, 80.66s/ files]   0%|          | 8/5000 [04:21<93:59:02, 67.78s/ files]   0%|          | 9/5000 [04:52<78:29:58, 56.62s/ files]  0%|          | 11/5000 [05:24<61:38:27, 44.48s/ files]  0%|          | 13/5000 [05:53<49:05:48, 35.44s/ files]  0%|          | 14/5000 [06:02<38:16:03, 27.63s/ files]  0%|          | 15/5000 [07:09<54:26:09, 39.31s/ files]  0%|          | 17/5000 [07:15<35:27:16, 25.61s/ files]
+Process ForkProcess-6:
+Traceback (most recent call last):
+  File "/data/tools/anaconda/lib/python3.7/multiprocessing/process.py", line 297, in _bootstrap
+    self.run()
+  File "/data/tools/anaconda/lib/python3.7/multiprocessing/process.py", line 99, in run
+    self._target(*self._args, **self._kwargs)
+  File "/data/tools/anaconda/lib/python3.7/concurrent/futures/process.py", line 233, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/data/tools/anaconda/lib/python3.7/multiprocessing/queues.py", line 93, in get
+    with self._rlock:
+  File "/data/tools/anaconda/lib/python3.7/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
+KeyboardInterrupt
+Process ForkProcess-3:
+Traceback (most recent call last):
+  File "/data/tools/anaconda/lib/python3.7/multiprocessing/process.py", line 297, in _bootstrap
+    self.run()
+  File "/data/tools/anaconda/lib/python3.7/multiprocessing/process.py", line 99, in run
+    self._target(*self._args, **self._kwargs)
+  File "/data/tools/anaconda/lib/python3.7/concurrent/futures/process.py", line 233, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/data/tools/anaconda/lib/python3.7/multiprocessing/queues.py", line 93, in get
+    with self._rlock:
+  File "/data/tools/anaconda/lib/python3.7/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
+KeyboardInterrupt
+Process ForkProcess-5:
+Traceback (most recent call last):
+  File "/data/tools/anaconda/lib/python3.7/multiprocessing/process.py", line 297, in _bootstrap
+    self.run()
+  File "/data/tools/anaconda/lib/python3.7/multiprocessing/process.py", line 99, in run
+    self._target(*self._args, **self._kwargs)
+  File "/data/tools/anaconda/lib/python3.7/concurrent/futures/process.py", line 233, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/data/tools/anaconda/lib/python3.7/multiprocessing/queues.py", line 94, in get
+    res = self._recv_bytes()
+  File "/data/tools/anaconda/lib/python3.7/multiprocessing/connection.py", line 216, in recv_bytes
+    buf = self._recv_bytes(maxlength)
+  File "/data/tools/anaconda/lib/python3.7/multiprocessing/connection.py", line 407, in _recv_bytes
+    buf = self._recv(4)
+  File "/data/tools/anaconda/lib/python3.7/multiprocessing/connection.py", line 379, in _recv
+    chunk = read(handle, remaining)
+KeyboardInterrupt
+Process ForkProcess-1:
+Traceback (most recent call last):
+  File "/data/tools/anaconda/lib/python3.7/multiprocessing/process.py", line 297, in _bootstrap
+    self.run()
+  File "/data/tools/anaconda/lib/python3.7/multiprocessing/process.py", line 99, in run
+    self._target(*self._args, **self._kwargs)
+  File "/data/tools/anaconda/lib/python3.7/concurrent/futures/process.py", line 233, in _process_worker
+    call_item = call_queue.get(block=True)
+  File "/data/tools/anaconda/lib/python3.7/multiprocessing/queues.py", line 93, in get
+    with self._rlock:
+  File "/data/tools/anaconda/lib/python3.7/multiprocessing/synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/work/derik/samromur-tools/QualityCheck/modules/procces_batch.py", line 61, in parallel_processor
+    for chunk in results:
+  File "/home/derik/.local/lib/python3.7/site-packages/tqdm/std.py", line 1171, in __iter__
+    for obj in iterable:
+  File "/data/tools/anaconda/lib/python3.7/concurrent/futures/process.py", line 483, in _chain_from_iterable_of_lists
+    for element in iterable:
+  File "/data/tools/anaconda/lib/python3.7/concurrent/futures/_base.py", line 598, in result_iterator
+    yield fs.pop().result()
+  File "/data/tools/anaconda/lib/python3.7/concurrent/futures/_base.py", line 430, in result
+    self._condition.wait(timeout)
+  File "/data/tools/anaconda/lib/python3.7/threading.py", line 296, in wait
+    waiter.acquire()
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "runQC.py", line 28, in <module>
+    batch_loader(args)
+  File "/work/derik/samromur-tools/QualityCheck/modules/procces_batch.py", line 47, in batch_loader
+    parallel_processor(create_and_decode, data, args.name, 6)
+  File "/work/derik/samromur-tools/QualityCheck/modules/procces_batch.py", line 65, in parallel_processor
+    f_out.write(',\n')
+  File "/data/tools/anaconda/lib/python3.7/concurrent/futures/_base.py", line 623, in __exit__
+    self.shutdown(wait=True)
+  File "/data/tools/anaconda/lib/python3.7/concurrent/futures/process.py", line 681, in shutdown
+    self._queue_management_thread.join()
+  File "/data/tools/anaconda/lib/python3.7/threading.py", line 1044, in join
+    self._wait_for_tstate_lock()
+  File "/data/tools/anaconda/lib/python3.7/threading.py", line 1060, in _wait_for_tstate_lock
+    elif lock.acquire(block, timeout):
+KeyboardInterrupt
+Error in atexit._run_exitfuncs:
+Traceback (most recent call last):
+  File "/data/tools/anaconda/lib/python3.7/concurrent/futures/process.py", line 104, in _python_exit
+    t.join()
+  File "/data/tools/anaconda/lib/python3.7/threading.py", line 1044, in join
+    self._wait_for_tstate_lock()
+  File "/data/tools/anaconda/lib/python3.7/threading.py", line 1060, in _wait_for_tstate_lock
+    elif lock.acquire(block, timeout):
+KeyboardInterrupt

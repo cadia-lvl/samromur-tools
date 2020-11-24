@@ -3,7 +3,7 @@ from os.path import join
 
 conf = dict(
     #Needed both for the training and evaluation steps
-    kaldi_root = '/home/dem/kaldi', 
+    kaldi_root = '/opt/kaldi', 
     sample_rate = 16000,
 
     # How many recordings to use to train the acoustic model. None for all avalible
@@ -11,14 +11,13 @@ conf = dict(
 
     #Path to recordings and subsequent metadata file. Used to train the acustic monophone model
     #and can also be used to decode and examine recordings.
-    recs = '/media/dem/pumba/samromur_v1/audio_16/fixed_header_16000',  
-    metadata = '/media/dem/pumba/samromur_v1/metadata.tsv',
+    recs = '/data/asr/samromur/samromur_v1/samromur_v1/audio/',  
+    metadata = '/data/asr/samromur/samromur_v1/samromur_v1/metadata.tsv',
 
     # A g2p model is used in the traning step
     g2p_model ='training/data/ipd_clean_slt2018.mdl',
     
     #Variables that you mostlikely wont have to change
     model = join(getcwd(), 'modules', 'local'),
-    archive = join(getcwd(), 'recordings'), #Location to store downloaded recordings if applicable
     reports_path = join(getcwd(), 'reports'), 
 ) 

@@ -35,13 +35,12 @@ def batch_loader(args):
                     "recId": i,
                     "token": sentence,
                     "valid": 1})
-    batch_size=conf 
-    #Hack for parallelzatio
+    batch_size=20
+    #Hack for parallelzation
     data = [data[x:x+batch_size] for x in range(0, len(data), batch_size)]
 
     
     log.info(f"\nThere are {len(ids)} in the provided id's file")
-    log.info(f"Creating {ceil(len(ids)/conf['batch_size'])} batch/es")
     
     if not exists(conf['reports_path']):
         mkdir(conf['reports_path'])
@@ -85,7 +84,7 @@ def create_and_decode(data:list):
 
 def create_and_decode1(data:list):
     '''
-    make this work the write
+    make this work then write
     '''
 
     u_prefix = shortuuid.uuid()
