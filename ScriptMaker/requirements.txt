@@ -1,0 +1,5 @@
+# Main requirements
+argparse
+futures
+tqdm
+concurrent-utils
