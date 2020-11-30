@@ -46,5 +46,23 @@ def rules(s):
 
     if s == '﻿þetta er eintakið':
         s = 'þetta er eintakið'
+    
+    if s == 'í t mellon og mj':
+        s = 'i t mellon og m punktur j punktur'
+
+    if s == 'i og ii':
+        s = 'fyrsti og annar'
+    
+    if s == 'kirk gs je':
+        s = 'kirk g punktur s j punktur e'
+
+    if s == "a ii b ii":
+        s = "a tveir b tveir"
+
+    if s == "patrik fer líka á bar inn":
+        s = "patrik fer líka á barinn"
+    
+    if s == "má þar nefna freebsd":
+        s = "má þar nefna free b s d"
 
     return s

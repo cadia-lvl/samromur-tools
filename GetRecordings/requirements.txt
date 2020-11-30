@@ -1,0 +1,7 @@
+boto3
+mysql-connector-python
+pandas
+enlighten
+uuid
+numpy
+soundfile
