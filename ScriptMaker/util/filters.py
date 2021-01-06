@@ -54,7 +54,7 @@ def filter_right_length(s:str):
         Return true if sentece is within the boundery of sentence max and min length
     '''
     s, origin = s.split('\t')
-    
+    s = s.rstrip()
     length = len(s.split(' '))
     if length >= min_length and length <= max_length:
         return s +'\t'+ origin

@@ -29,7 +29,10 @@ class TextParser():
             self.codes: str = ''
         self.codes: list = []
         self.number_of_jobs:int = args.n_jobs
-        self.output_directory: str = args.output_folder
+        if args.code_name:
+            self.output_directory: str = args.output_folder + '_' + args.code_name
+        else:
+            self.output_directory: str = args.output_folder
         self.file_extensions: str = args.file_type
         self.current_directory: str = ''
         self.set_origin: str = None
@@ -167,6 +170,7 @@ class TextParser():
 
     def remove_sentences_with_bad_words(self):
         print('Filtering out bad words')
+
         code: str = 'kid_friendly'
         text: set = self.open_file_add_to_set()
         self.update_current_directory_and_codes(code) 

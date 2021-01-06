@@ -17,4 +17,19 @@ To start the extraction process make run the script extractor.py. It has three p
 
 The command should look something like this:
 
-		python .\code\Althingi_data_prep\extractor.py -d1 .\data\rmh2\ -d2 .\data\thingmenn.txt -n 3
+		python3 filter.py -rmh /data/text/risamalheild/2018/rmh1/textasafn_arnastofnun/2008 -c test -smax 5 -wmax 6
+
+
+Resources needed outside of this repo 
+
+	Run:
+	
+	mkdir -p util/data
+
+	wget -o data/bad_words.txt https://github.com/aime-island/inappropriate_words/blob/master/inappropriate_words?raw=true
+
+	wget https://bin.arnastofnun.is/django/api/nidurhal/?file=ordmyndir.txt.zip
+
+	unzip index.html?file=ordmyndir.txt.zip
+
+	cp ordmyndir.txt data/ordmyndir.txt

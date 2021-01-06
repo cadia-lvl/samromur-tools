@@ -84,9 +84,6 @@ def clean_text_from_xml(s: str):
     #Tek burtu tákn sem birstast of í upphafi setningar
     s = re.sub(r'^\s*', '', s)
     s = re.sub(r'^[\:|\-| \"\s|\,]*', '', s)
-    s = re.sub(r'^\s*', '', s)
-
-    #Tek burtu auk bil ef það eru tvö eða fleiri
     s = re.sub(r'\s{2,}', ' ', s)
 
     #Tek burtu newline ef það eru einhver

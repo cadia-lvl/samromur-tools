@@ -7,7 +7,7 @@ def create_parser():
         formatter_class=argparse.MetavarTypeHelpFormatter)
 
     parser.add_argument(
-        '-rmh', '--process_rmh', required=False, default=None, type=str, help='path to data folder to extract')
+        '-rmh', '--process_rmh', required=False, default=None, type=str, help='path to data folder to extract, in  the .xml format')
 
     parser.add_argument(
         '-t', '--process_text', required=False, default=None, type=str, help='path to data text file to be normalized')
@@ -19,7 +19,7 @@ def create_parser():
         '-n', '--n_jobs', required=False, type= int, default=1, help='Count of how many parallel jobs')
 
     parser.add_argument(
-        '-bw', '--bad_words_path', required=False, type= str, help='Path to file with bad words')
+        '-bw', '--bad_words_path', required=False, type=str, default='util/data/bad_words.txt', help='Path to file with bad words')
 
     parser.add_argument(
         '-smin', '--s_min', required=False, type= int, default=2, help='Minnimum length of sentences')
