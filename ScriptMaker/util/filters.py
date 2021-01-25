@@ -24,7 +24,7 @@ BIN = set([line.strip().lower() for line in open(root+'/data/ordmyndir.txt')])
 #Decalre an empty set for bad words
 bad_words = set([line.rstrip() for line in open(root+'/data/bad_words.txt')])
 
-#Decalare these global variables
+#Decalare these global variables, this file is made during runtime with the arguments provied through cli
 max_length: int = conf['sentence_max']
 min_length: int = conf['sentence_min']
 
@@ -56,6 +56,7 @@ def filter_right_length(s:str):
     s, origin = s.split('\t')
     s = s.rstrip()
     length = len(s.split(' '))
+
     if length >= min_length and length <= max_length:
         return s +'\t'+ origin
     else:
