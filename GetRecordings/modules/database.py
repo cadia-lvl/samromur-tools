@@ -18,36 +18,47 @@ class S3:
         filepath = join(output_dir, filename)
         with open(filepath, 'wb') as _file:
             self.client.download_fileobj(self.bucket, path, _file)
-        return filepath, filename
+        return filename
 
 class MySQL:
 
-    def __init__(self):
+    def __init__(self, ids_to_get):
         self.credentials = get_credentials('db')
         self.db = mysql.connect(**self.credentials)
         self.cursor = self.db.cursor(dictionary=True)
+        self.ids = ids_to_get
 
-    def get_clips(self):
-        ids = self.get_ids()
-        
-        """
-        query = ('''
-            SELECT 
-                *
-            FROM 
-                clips
-           ''')
-        """
-        
+    def get_all_data_about_clips(self):
+        ids = self.ids
+
         query = (f'SELECT * FROM clips WHERE id IN {*ids,}')
+        #query = ('SELECT * FROM clips')
+        
+        #query = ('SELECT * FROM clips where created_at > "2021-01-01" and created_at < "2021-01-20"')
+        #query = ('SELECT * FROM clips where created_at > "2021-01-19"')
+        #query = ('SELECT * FROM clips where created_at > "2021-01-01"')
+        
         self.cursor.execute(query)
         data = self.cursor.fetchall()
         
         return pd.DataFrame(data) 
 
-    def get_ids(self):
-        return_list = []
-        with open('recs_to_download.txt') as f_in:
-            for i in f_in:
-                return_list.append(i)
-        return return_list
+    def get_clips_s3_path(self):
+        '''
+        Reads the id's to get from the file recs_to_download.txt. Does a call to the 
+        sql server and returns a list of dictionaries where each dict as a "id" and "path" object.
+        id is the clip id and the path is the path to the s3 bucket of that clip.
+        '''
+        ids = self.ids
+        
+        query = (f'SELECT id, path FROM clips WHERE id IN {*ids,}')
+        #query = ('SELECT id, path FROM clips')
+        
+        
+        #query = ('SELECT id, path FROM clips where created_at > "2021-01-01" and created_at < "2021-01-20"')
+        #query = ('SELECT * FROM clips where created_at > "2021-01-19"')
+        #query = ('SELECT * FROM clips where created_at > "2021-01-01"')
+
+        self.cursor.execute(query)        
+        return self.cursor.fetchall()
+        
