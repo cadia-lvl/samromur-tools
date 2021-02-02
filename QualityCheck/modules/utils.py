@@ -31,8 +31,10 @@ def errLog(x):
     Logs x to celery INFO. Used as a callback in sh piping to manually print
       otherwise swallowed error logs.
     """
-    logger = get_task_logger(__name__)
-    logger.info(x)
+    #logger = get_task_logger(__name__)
+    #logger.info(x)
+    with open('log/error', 'a') as f_out:
+        f_out('{} {}'.format(str(date), str(x)))
 
 
 def log(msg, e=None):
@@ -73,4 +75,3 @@ def isWavHeaderOnly(wavAbsPath) -> bool:
         True if wav file contains only a wav header and no data (is 44 bytes)
     """
     return os.path.getsize(wavAbsPath) == 44
-

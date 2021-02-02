@@ -85,7 +85,11 @@ if [ $stage -le 2 ]; then
         exp/mono
 fi
 
+
 if [ $stage -le 3 ]; then
+    #Fix for error: "chain-est-phone-lm: error while loading shared libraries: libcublas.so.8.0: cannot open shared object file: No such file or directory"
+    module load cuda/8.0
+    module load kaldi
 
     ./local/lang_add_phones.sh data/local/dict/lexiconp.txt data/lang data/newlang
     ./local/make_phone_bigram_fst.sh exp/mono data/newlang local/my_phone_fst

@@ -1,20 +1,4 @@
 
-
-def speaker_mapping(df):
-    '''
-    Takes in the dataframe and returns a dictionary mapping
-    bwtween client_id and speaker id.        
-    '''
-
-    speakers:dict = {}
-    count: int = 1
-    for _, row in df.iterrows():
-        if row['client_id'] not in speakers:
-            speakers[row['client_id']] = count
-            count +=1
-
-    return speakers
-
 def age_mapping(key):
     '''
     Takes in an age value from the format in the database

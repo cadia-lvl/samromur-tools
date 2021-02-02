@@ -18,10 +18,11 @@
 #     David Erik Mollberg
 
 import tempfile
-
+import sys
 from sh import Command, ErrorReturnCode_1
 from os.path import join
-from modules.utils import errLog, log, isWavHeaderOnly
+import json
+from modules.utils import errLog, isWavHeaderOnly
 from modules.marosijoCommon import MarosijoCommon
 from modules.marosijoAnalyzer import MarosijoAnalyzer
 
@@ -137,10 +138,9 @@ class MarosijoTask():
                 for r in recordings:
                     if self.common.downsample:
                         print('{rec_id} sox {rec_path} -r{sample_freq} -t wav - |'
-                              .format(
-                                  rec_id=r['recId'],
-                                  rec_path=r['recPath'],
-                                  sample_freq=self.common.sampleFreq), file=mfccFeatsTmp)
+                              .format(rec_id=r['recId'],
+                                      rec_path=r['recPath'],
+                                      sample_freq=self.common.sampleFreq), file=mfccFeatsTmp)
                     else:
                         print('{} {}'.format(r['recId'], r['recPath']),
                               file=mfccFeatsTmp)
@@ -153,7 +153,7 @@ class MarosijoTask():
                         graphsScp.append('{} {}'.format(r['recId'],
                                                         self.decodedScpRefs[str(r['tokenId'])]))
                     except KeyError as e:
-                        log('Error, probably could not find key in MarosijoModule/local/graphs.scp, id: {}, prompt: {}'
+                        print('Error, probably could not find key in MarosijoModule/local/graphs.scp, id: {}, prompt: {}'
                              .format(r['tokenId'], r['token']))
                         raise
 
@@ -186,9 +186,11 @@ class MarosijoTask():
                 # piping in contents of tokens_graphs_scp_path and writing to edits_path
                 # note: be careful, as of date sh seems to swallow exceptions in the inner pipe
                 #   https://github.com/amoffat/sh/issues/309
+
+                
                 hypLines = latticeBestPath(
                     gmmLatgenFaster(
-                        '--acoustic-scale=0.1',
+                        '--acoustic-scale=0.06',    ##DEM - --acoustic-scale=0.06 This was 0.1, changing this value fixed the issue of phonemes ending in the transcription
                         '--beam=12',
                         '--max-active=1000',
                         '--lattice-beam=10.0',
@@ -197,19 +199,20 @@ class MarosijoTask():
                         f'scp,p:{tokensGraphsScpPath}',  # fsts-rspecifier
                         f'ark,p:{featsCmd} |',           # features-rspecifier
                         'ark:-',                                 # lattice-wspecifier
-                        _err=errLog,
+                        _err=sys.stderr,
                         _piped=True),
-                    '--acoustic-scale=0.06',
-                    f"--word-symbol-table={self.common.symbolTablePath}",
-                    'ark,p:-',
-                    'ark,t:-',
-                    _iter=True,
-                    _err=errLog
-                )
+                        '--acoustic-scale=0.06',
+                        f"--word-symbol-table={self.common.symbolTablePath}",
+                        'ark,p:-',
+                        'ark,t:-',
+                        _iter=True,
+                        _err=sys.stderr)
+
+
             except ErrorReturnCode_1 as e:
                 # No data (e.g. all wavs unreadable)
                 hypLines = []
-                log('e.stderr: ', e.stderr)
+                print('e.stderr: ', e.stderr)
 
             def splitAlsoEmpty(s):
                 cols = s.split(maxsplit=1)
@@ -232,6 +235,7 @@ class MarosijoTask():
                      
             details = {hypKey: MarosijoAnalyzer(hypTok.split(), refs[hypKey].split(), self.common).details() for
                        hypKey, hypTok in hyps.items()}
+            
             # 'empty' analysis in case Kaldi couldn't analyse recording for some reason
             # look at MarosijoAnalyzer.details() for format
             placeholderDetails = {
@@ -247,8 +251,8 @@ class MarosijoTask():
                 'enddel': 0,
                 'extraInsertions': 0,
                 'empty': False,
-                'distance': 0
-            }
+                'distance': 0}
+
 
             edits = {hypKey: details[hypKey]['distance'] for
                      hypKey, hypTok in hyps.items()}
@@ -257,33 +261,53 @@ class MarosijoTask():
 
             cumAccuracy = 0.0
 
+            """
+            We have an error in hypLines where gmmLatgenFaster outputs: 
+            Not producing output for utterance SESS0139_BLOCKG_08 since no final-state reached and --allow-partial=false
+            This means that the key for that utterance isnt added to the dict hyps and that causes an error down
+            the line. The fix is to remove that key for the dict recordings. And later figure out what to 
+            do with does recs
+            https://groups.google.com/g/kaldi-help/c/fTc3RP21tBY?pli=1
+            
+            """
+
+            with open(join('log', 'tharErrorLog'), 'a') as f_out:
+                for r in recordings:
+                    if str(r['recId']) not in hyps.keys():
+                        f_out.write(str(r)+'\n')
+                        recordings.remove(r)
+
+
             for r in recordings:
                 error = ''
                 try:
-                    # this is the old wer where a single phoneme is treated as a single word
                     old_wer = edits[str(r['recId'])] / len(r['token'].split())
+
                 except KeyError as e:
                     # Kaldi must have choked on this recording for some reason
                     if isWavHeaderOnly(r['recPath']):
                         error = 'wav_header_only'
-                        log('Error, only wav header in recording: {} for session: {}; {}'
+                        print('Error, only wav header in recording: {} for session: {}; {}'
                             .format(r['recId'], repr(e)))
                     else:
                         # unknown error
+                        print(e)
                         error = 'unknown_error'
-                        log('Error, unknown error processing recording: {} for session {}; {}'
+                        print('Error, unknown error processing recording: {}; {}'
                             .format(r['recId'], repr(e)))
 
                 try:
                     hyp =  ' '.join([self.common.symbolTableToInt[x] 
                     for x in hyps[str(r['recId'])].split(' ')]) # hypothesis (words not ints)
+                    
+
                 except KeyError as e:
                     if hyps[str(r['recId'])] == '':
                         hyp = ''
                     else:
                         if not error:
                             error = 'hyp_error'
-                            log('Error, hypothesis error processing recording: {} for session {}; {}'
+                            print('Error, hypothesis error processing recording: {} for session {}'
                                 .format(r['recId'], repr(e)))
 
                 if not error:
@@ -313,6 +337,10 @@ class MarosijoTask():
                 cumAccuracy += accuracy
 
                 stats.update(analysis)
-                qcReport.append({"recordingId": r['recId'], "recPath": r['recPath'], "sentence": r['token'], "is valid?": r['valid'], "stats": stats})
+                qcReport.append({"recordingId": r['recId'],\
+                                 "recPath": r['recPath'],\
+                                 "sentence": r['token'], \
+                                 "is valid?": r['valid'], \
+                                 "stats": stats})
            
         return qcReport

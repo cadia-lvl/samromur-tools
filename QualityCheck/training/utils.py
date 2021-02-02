@@ -6,7 +6,6 @@ from re import sub
 import subprocess
 
 
-from training.normalize_samromur import normalize_sentence
 from training.file_prep import create_folders_and_files
 
 data_folder=join(os.getcwd(),'training','data')
@@ -18,13 +17,12 @@ lexicon_file=join(data_folder, 'lexicon.txt')
 phonemes_file=join(data_folder, 'phonemes.txt')
 
 
-def normalize_and_prep_data(conf, n_acoustic):
+def prep_data(conf):
     '''
-    Normalize the text and prep files.
+    Prep Kaldi files.
     '''
 
     create_folders_and_files(conf, data_folder, scripts, kaldi_datadir_path)
-    alphabet = 'aábdðeéfghiíjklmnoóprstuúvxyýþæö wzqc'
 
     text = open('{}/text'.format(kaldi_datadir_path), 'w')
     wavscp = open('{}/wav.scp'.format(kaldi_datadir_path), 'w')
@@ -32,31 +30,22 @@ def normalize_and_prep_data(conf, n_acoustic):
     spk2utt = open('{}/spk2utt'.format(kaldi_datadir_path), 'w')
 
     tokens = set()
+    df = pd.read_csv(join(conf['metadata']), sep='\t', dtype='str')
+    df.set_index('id', inplace=True)
 
-    df = pd.read_csv(join(conf['metadata']), sep='\t', index_col='id')
-
-    if conf['n_acoustic']:
-        #Variables to limit the acustic data used. 
-        n = [conf['n_acoustic'], True, 1]
-    else:
-        n = [1, False, 0]
-        
     for i in tqdm(df.index, unit='lines'):
-        df.at[i, 'sentence'] = normalize_sentence(df.at[i, 'sentence'])
-
-        for tok in df.at[i, 'sentence'].split(' '):
+        for tok in df.at[i, 'sentence_norm'].split(' '):
             tokens.add(tok)
 
-        if n[2] <= n[0]:
-            utt_id = '{}-{}'.format(df.at[i, 'speaker_id'], i)
-            full_rec_path = join(conf['recs'], df.at[i, 'filename'])
-            print(utt_id, df.at[i, 'sentence'], file=text)
-            print(f'{utt_id} sox - -c1 -esigned -r {conf["sample_rate"]} -twav - < {full_rec_path} | ', file=wavscp)
-            print(utt_id, str(df.at[i, 'speaker_id']), file=utt2spk)
+    df_acoustic = df[df['is_valid']=='1']
+    print(f"{len(df_acoustic)} being used for acoustic training")
 
-        if n[1]:
-            n[2] += 1
-
+    for i in tqdm(df_acoustic.index, unit='lines'):
+        utt_id = df.at[i, 'filename'][:-4]
+        full_rec_path = join(conf['recs'], df.at[i, 'filename'])
+        print(utt_id, df.at[i, 'sentence_norm'], file=text)
+        print(f'{utt_id} sox - -c1 -esigned -r {conf["sample_rate"]} -twav - < {full_rec_path} | ', file=wavscp)
+        print(f"{utt_id} {df.at[i, 'speaker_id']}", file=utt2spk)
 
     text.close()
     wavscp.close()

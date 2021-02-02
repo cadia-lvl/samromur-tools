@@ -19,7 +19,6 @@ The command should look something like this:
 
 		python3 filter.py -rmh /data/text/risamalheild/2018/rmh1/textasafn_arnastofnun/2008 -c test -smax 5 -wmax 6
 
-
 Resources needed outside of this repo 
 
 	Run:
