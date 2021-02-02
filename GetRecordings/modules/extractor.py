@@ -37,65 +37,18 @@ class Extractor:
         '''
         Create folders if necessary
         '''
-        if exists(self.output_dir) and self.overwrite:
+        if exists(self.output_dir): #This might cuase trouble when downloading
             input('The folder output will be overwritten, click to proceed')
             rmtree(self.output_dir)
             os.mkdir(self.output_dir)
             os.mkdir(join(self.output_dir, 'audio'))
             os.mkdir(join(self.output_dir, 'audio_correct_names'))
-   
-    def parallel_processor_with_no_return(self, function, iterator, n_jobs, chunks=2500, units ='files'):
-        #Chunk size should be 1 in acordance with the hack above
-        with ProcessPoolExecutor(max_workers=n_jobs) as executor:
-            results =  tqdm(executor.map(
-                function,
-                iterator,
-                chunksize=chunks), 
-                total=len(iterator),
-                unit= ' '+ units) 
-    
-    def parallel_processor(self, function, iterator, n_jobs, chunks=1, units ='files'):
-        #Chunk size should be 1 in acordance with the hack above
-        results: list = []
-        with open(join(self.output_dir, self.recs_file), 'w') as f_out:
-            with ThreadPoolExecutor(max_workers=n_jobs) as executor:
-                results =  tqdm(executor.map(
-                    function,
-                    iterator,
-                    chunksize=chunks), 
-                    total=len(iterator),
-                    unit= ' '+ units)
-                for line in results:
-                    f_out.write(f"{line[0]}\t{line[1]}\n")
+        else:
+            os.mkdir(self.output_dir)
+            os.mkdir(join(self.output_dir, 'audio'))
+            os.mkdir(join(self.output_dir, 'audio_correct_names'))
 
-    def download_clips_parallel(self):
-        print('Downloading clips')
-        data = self.sql.get_clips_s3_path()
-        self.parallel_processor(self.download_clips_p, data, self.threads, chunks=250, units ='files')
 
-    def download_clips_p(self, data):
-        '''
-        Function that downloads the clips to "output_dir" and creates
-        tab separate file with the lines <clip-id>\t<uuid-filename>
-        '''
-        #data = self.sql.get_clips_s3_path()
-        #print('Downloading')
-        filename = self.s3.get_object(join(self.output_dir, 'audio'), data['path'])
-        return [data['id'], filename]
-
-  
-    def download_clips(self, data):
-        '''
-        Function that downloads the clips to "output_dir" and creates
-        tab separate file with the lines <clip-id>\t<uuid-filename>
-        '''
-        #data = self.sql.get_clips_s3_path()
-        #print('Downloading')
-        with open(join(self.output_dir, self.recs_file), 'w') as f_out:
-            for line in data:
-                filename = self.s3.get_object(join(self.output_dir, 'audio'), line['path'])
-                f_out.write(f"{line['id']}\t{filename}\n")
-    
     def get_metadata(self):
         metadata = self.sql.get_all_data_about_clips()
         metadata['speaker_id'] = 'NAN'
@@ -132,7 +85,7 @@ class Extractor:
         # Preform multible mappings on the metadata dataframe
         print('Parsing metadata')
         for i in tqdm(df.index):
-            df.at[i, 'id'] = str(df.at[i, 'id']).zfill(6)
+            df.at[i, 'id'] = str(df.at[i, 'id']).zfill(7)
             df.at[i, 'sentence'] = df.at[i, 'sentence'].rstrip()
             df.at[i, 'dialect'] = dialect_mapping(df.at[i, 'dialect'])
             df.at[i, 'age'] = age_mapping(df.at[i, 'age'])
@@ -236,43 +189,57 @@ class Extractor:
                 print(f"Error working with file {i}\n\n{e}")
 
         name = join(self.output_dir, self.metadata_filename[:-4] + '_inspect.tsv')
-        self.to_file(name, df)
-
-    def fix_header(self):
-        """
-        Fix headers is beacause we have had a bug when recording, that function will
-        also downsample the recordings to 16khz.
-        """
-        df = pd.read_csv(join(self.output_dir, self.metadata_filename), sep='\t', dtype=str)
-        df.set_index('id', inplace=True)
-
-        recs:dict = {}
-        with open(join(self.output_dir, self.recs_file)) as f_in:
-            for line in f_in:
-                id, filename = line.split('\t')
-                id = id.zfill(6)
-                recs[id] = filename.rstrip()
-                
-        iterator:list = []
-        for i in df.index:
-            iterator.append([recs[i], df.at[i, 'filename']])
-
-        print('Fixing header and downsampling')
-        #def parallel_processor_with_no_return(self, function, iterator, n_jobs, chunks=2500, units ='files'):
-
-        #self.parallel_processor_with_no_return(self.fix_header_func, iterator, n_jobs=5, chunks=10)
-        for line in tqdm(iterator):
-            self.fix_header_func(line)
-            
+        self.to_file(name, df)            
 
     def to_file(self, name, df):
         df.to_csv(name, header=True, sep='\t')
 
-    def fix_header_func(self, d:list):
+    def parallel_processor(self, function, iterator, n_jobs, chunks=1, units ='files'):
+        results: list = []
+        with ThreadPoolExecutor(max_workers=n_jobs) as executor:
+            results =  tqdm(executor.map(
+                function,
+                iterator,
+                chunksize=chunks), 
+                total=len(iterator),
+                unit= ' '+ units)
+ 
+    def download_clips_parallel(self):
+        print('Downloading clips')
+        data = self.sql.get_clips_s3_path()
+
+        self.parallel_processor(self.download_clips_p, data, self.threads, chunks=250, units ='files')
+
+    def download_clips_p(self, data):
+        '''
+        Add discription
+        '''
+        uuid_filename = self.s3.get_object(join(self.output_dir, 'audio'), data['path'])
+        new_filname = data['speaker_id'] + '-' + data['id'].zfill(7) + '.wav'
+        self.fix_header(uuid_filename, data['speaker_id'])
+        os.remove(uuid_filename)
+
+
+    def fix_header(self, old_filename, sub_folder, new_filname):
         """
         Fix headers in the wav files and downsample to 16khz.
+        We also add the clips in a folder structure that is.
+        
+        output/
+            audio_correct_names/
+                speaker_id 1/
+                    audio_clip 1
+                        ...
+                    audio_clip n
+                speaker_id 2/
+                    ...
+                speaker_id n/
         """
-        res = sp.run(f'ffmpeg -hide_banner -loglevel warning -i "teens/audio/{d[0]}" -ar 16000 "teens/audio_correct_names/{d[1]}"',\
+        
+        if not exists(join(self.output_dir, sub_folder):
+            os.mkdir(join(self.output_dir, sub_folder)
+
+        res = sp.run(f'ffmpeg -hide_banner -loglevel warning -i "{self.output_dir}/audio/{old_filename}" -ar 16000 "{self.output_dir}/audio_correct_names/{sub_folder}/{new_filname}"',\
                 shell=True,
                 stderr=sp.PIPE,
                 stdout=sp.PIPE)
