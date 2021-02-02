@@ -139,6 +139,9 @@ class Extractor:
             df.at[i, 'sex'] = gender_mapping(df.at[i, 'sex'])
             df.at[i, 'native_language'] = nationality_mapping(df.at[i, 'native_language'])
 
+        # Use the id column as an index
+        # Inplace so that this will be done for THIS dataframe rather than
+        # copying it to a new variable (where the 'id' would be used as an index).
         df.set_index('id', inplace =True)
 
         # Rename the coloumn sex as gender
