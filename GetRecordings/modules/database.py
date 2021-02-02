@@ -31,8 +31,8 @@ class MySQL:
     def get_all_data_about_clips(self):
         ids = self.ids
 
-        query = (f'SELECT * FROM clips WHERE id IN {*ids,}')
-        #query = ('SELECT * FROM clips')
+        #query = (f'SELECT * FROM clips WHERE id IN {*ids,}')
+        query = ('SELECT * FROM clips')
         
         #query = ('SELECT * FROM clips where created_at > "2021-01-01" and created_at < "2021-01-20"')
         #query = ('SELECT * FROM clips where created_at > "2021-01-19"')
@@ -51,9 +51,8 @@ class MySQL:
         '''
         ids = self.ids
         
-        query = (f'SELECT id, path FROM clips WHERE id IN {*ids,}')
-        #query = ('SELECT id, path FROM clips')
-        
+        #query = (f'SELECT id, path FROM clips WHERE id IN {*ids,}')
+        query = ('SELECT id, speaker_id, path FROM clips limit 10')
         
         #query = ('SELECT id, path FROM clips where created_at > "2021-01-01" and created_at < "2021-01-20"')
         #query = ('SELECT * FROM clips where created_at > "2021-01-19"')
