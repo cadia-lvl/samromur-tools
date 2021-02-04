@@ -1,7 +1,8 @@
 boto3
 mysql-connector-python
 pandas
-enlighten
+tqdm
 uuid
 numpy
 soundfile
+pydub
