@@ -27,11 +27,11 @@ if __name__ == '__main__':
     parser.add_argument(
         '-or', '--overwrite', required=False, default=False, type=boolean_string, help='Overwrite the output folder')
 
+    # TODO: Add arguments: -v --verbose and -h --help. 
+
     args = parser.parse_args()
 
     extractor = Extractor(args)    
     extractor.get_metadata()
     extractor.download_clips_parallel()                                                                                                                                                 
     extractor.inspect_all_audio_files()
-    #extractor.inspect_audio_only_those_with_NAN()
-    extractor.fix_header()

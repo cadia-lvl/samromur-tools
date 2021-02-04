@@ -5,3 +5,4 @@ tqdm
 uuid
 numpy
 soundfile
+pydub
