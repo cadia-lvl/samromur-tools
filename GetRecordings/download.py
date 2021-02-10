@@ -34,7 +34,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     extractor = Extractor(args)    
-    
+
     extractor.get_metadata()
     extractor.download_clips()                                                                                                                                                 
     extractor.inspect_all_audio_files()
+
+    print('\nFinished')

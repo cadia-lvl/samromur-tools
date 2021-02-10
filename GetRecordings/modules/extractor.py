@@ -192,14 +192,19 @@ class Extractor:
         # Just a precaution until every row in the database has a speaker_id != null.
         # Hopefully this won't be a issue anymore once the 708 speaker_id-less rows in the database have been
         # taken care of.
-        for row in data:
-            if not row['speaker_id']:
-                raise Exception(f'Row with id: {row['id']} does not contain a speaker_id. Aborting....')
+        try:
+            for row in data:
+                if not row['speaker_id']:
+                    raise Exception()
+        except Exception as e:
+            print(f'Row with id: {row["id"]} does not contain a speaker_id. Aborting....')
 
         for row in data:
             # Ready the entire folder structure before commencing download.
             if not exists(join(self.output_dir, 'audio_correct_names', row['speaker_id'])):
                 os.mkdir(join(self.output_dir, 'audio_correct_names', row['speaker_id']))
+
+            # self.download_clips_parallel(row)     # Use this line for easier debug experience, by not using threads. Just remember to comment out the call to parallel_processor() below!
 
         # parallel_processor() takes care of the rest along with download_clips_parallel().
         self.parallel_processor(self.download_clips_parallel, data, self.threads, chunks=250, units ='files')
@@ -219,8 +224,8 @@ class Extractor:
 
         # The new filename, after downsampling, will be on the form speaker_id-id.wav
         # Example: 012522-15233.wav
-        new_filename = row['speaker_id'] + '-' + row['id'].zfill(7) + '.wav'
-        
+        new_filename = row['speaker_id'] + '-' + str(row['id']).zfill(7) + '.wav'
+
         # Downsample the temporary file and copy the result to a new folder where all of the audio files are organised.
         self.fix_header(uuid_filename, row['speaker_id'], new_filename)
 
