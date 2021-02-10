@@ -167,6 +167,10 @@ class Extractor:
         df.to_csv(name, header=True, sep='\t')
 
     def parallel_processor(self, function, iterator, n_jobs, chunks=1, units ='files'):
+        '''
+        This function takes download_clips_parallel() as an argument along with the data (iterator) it is supposed to iterate through.
+        '''
+
         results: list = []
         with ThreadPoolExecutor(max_workers=n_jobs) as executor:
             results = tqdm(executor.map(
@@ -177,16 +181,27 @@ class Extractor:
                 unit=' '+ units)
  
     def download_clips(self):
+        '''
+        Call this function if you intend to download the clips. It prepares the download process before using 
+        parallel_processor() to download the clips using download_clips_parallel().
+        '''
+
         print('Downloading clips')
         data = self.sql.get_clips_s3_path()
 
+        # Just a precaution until every row in the database has a speaker_id != null.
+        # Hopefully this won't be a issue anymore once the 708 speaker_id-less rows in the database have been
+        # taken care of.
         for row in data:
             if not row['speaker_id']:
-                raise Exception('Some of the data does not contain speaker_id. Please take appropriate action to handle these cases.')
+                raise Exception(f'Row with id: {row['id']} does not contain a speaker_id. Aborting....')
 
+        for row in data:
+            # Ready the entire folder structure before commencing download.
             if not exists(join(self.output_dir, 'audio_correct_names', row['speaker_id'])):
                 os.mkdir(join(self.output_dir, 'audio_correct_names', row['speaker_id']))
 
+        # parallel_processor() takes care of the rest along with download_clips_parallel().
         self.parallel_processor(self.download_clips_parallel, data, self.threads, chunks=250, units ='files')
 
         # TODO: Delete output/audio folder when it has become empty. I think this would be the appropriate place to do it, assuming
