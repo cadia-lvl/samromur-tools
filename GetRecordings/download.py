@@ -27,11 +27,13 @@ if __name__ == '__main__':
     parser.add_argument(
         '-or', '--overwrite', required=False, default=False, type=boolean_string, help='Overwrite the output folder')
 
-    # TODO: Add arguments: -v --verbose and -h --help. 
+    # TODO: Add arguments: -v --verbose         help='Print additional data as the script is running.'
+    #                      -h --help            help='Some text about what this script does in general.'
+    #                      -u --unfetched       help='Scan the database for unfetched data and download it.'
 
     args = parser.parse_args()
 
     extractor = Extractor(args)    
     extractor.get_metadata()
-    extractor.download_clips_parallel()                                                                                                                                                 
+    extractor.download_clips()                                                                                                                                                 
     extractor.inspect_all_audio_files()
