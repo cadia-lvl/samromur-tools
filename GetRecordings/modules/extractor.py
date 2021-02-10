@@ -85,10 +85,23 @@ class Extractor:
                             'size',
                             'user_agent']]
 
+        # Just a precaution until every row in the database has a speaker_id != null.
+        # Hopefully this won't be a issue anymore once the 700+ speaker_id-less rows in the database have been
+        # taken care of.
+        try:
+            for i in metadata.index:
+                if metadata.at[i, 'speaker_id'] == 'NAN':
+                    raise Exception()
+        except Exception as e:
+            print(f'Row with id: {metadata.at[i, "id"]} does not contain a speaker_id. Aborting....')
+            return False
+
         metadata = self.parse_metadata(metadata)
 
         name = join(self.output_dir, self.metadata_filename)
         self.to_file(name, metadata)
+
+        return True
 
     def parse_metadata(self, df):
         '''
@@ -188,16 +201,6 @@ class Extractor:
 
         print('Downloading clips')
         data = self.sql.get_clips_s3_path()
-
-        # Just a precaution until every row in the database has a speaker_id != null.
-        # Hopefully this won't be a issue anymore once the 708 speaker_id-less rows in the database have been
-        # taken care of.
-        try:
-            for row in data:
-                if not row['speaker_id']:
-                    raise Exception()
-        except Exception as e:
-            print(f'Row with id: {row["id"]} does not contain a speaker_id. Aborting....')
 
         for row in data:
             # Ready the entire folder structure before commencing download.

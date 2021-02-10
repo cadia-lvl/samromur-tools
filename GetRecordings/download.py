@@ -35,8 +35,8 @@ if __name__ == '__main__':
 
     extractor = Extractor(args)    
 
-    extractor.get_metadata()
-    extractor.download_clips()                                                                                                                                                 
-    extractor.inspect_all_audio_files()
-
-    print('\nFinished')
+    # The download and inspection processes will not start unless the metadata is okay.
+    if extractor.get_metadata():
+        extractor.download_clips()                                                                                                                                                 
+        extractor.inspect_all_audio_files()
+        print('\nFinished')
