@@ -51,7 +51,7 @@ class MySQL:
         '''
         ids = self.ids
         
-        query = (f'SELECT id, path FROM clips WHERE id IN {*ids,}')
+        query = (f'SELECT id, speaker_id, path FROM clips WHERE id IN {*ids,}')
         # query = ('SELECT id, speaker_id, path FROM clips limit 10')
         
         #query = ('SELECT id, path FROM clips where created_at > "2021-01-01" and created_at < "2021-01-20"')

@@ -9,7 +9,6 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 import subprocess as sp
 import re
 
-
 from modules.database import S3, MySQL
 from modules.audio_tools import read_audio, get_duration, save_audio, detect_empty_waves
 from modules.mapping import age_mapping, gender_mapping, nationality_mapping, dialect_mapping
@@ -19,24 +18,14 @@ class Extractor:
     def __init__(self, args):
         self.output_dir = args.output
         self.metadata_filename = args.metadata
-        self.recs_file = 'db_rec_names.tsv'
-        self.threads=args.threads
+        self.threads = args.threads
         self.overwrite = args.overwrite
-        self.s3 = S3()
         self.ids_to_get = args.ids
+        
+        self.s3 = S3()
         self.sql = MySQL(self.open_ids_file())
 
         self.ensure_dirs()
-        self.filenames_skitamix = {}
-
-    def skitamix(self):
-        temp:dict = {}
-        df = pd.read_csv(join(self.output_dir, self.metadata_filename), index_col='id', sep='\t')
-        for i in df.index:
-            temp_i = str(i).zfill(7)
-            temp[temp_i] = df.at[i, 'filename']
-        self.filenames_skitamix = temp
-
 
     def open_ids_file(self):
             return_list = []
@@ -49,29 +38,39 @@ class Extractor:
         '''
         Create folders if necessary
         '''
-        if exists(self.output_dir): #This might cuase trouble when downloading
+
+        # If the output folder exists and we wish to overwrite it, hit enter to proceed.
+        # Use with EXTREME CAUTION.
+        if exists(self.output_dir) and self.overwrite:
+            # Comment this line before using sbatch.
             input('The folder output will be overwritten, click to proceed')
+            
             rmtree(self.output_dir)
             os.mkdir(self.output_dir)
             os.mkdir(join(self.output_dir, 'audio'))
             os.mkdir(join(self.output_dir, 'audio_correct_names'))
+
+        # If the output folder exists, just carry on and do nothing.
+        elif exists(self.output_dir):
+            return
+
+        # If the output folder does not exist, make a new empty one.
         else:
             os.mkdir(self.output_dir)
             os.mkdir(join(self.output_dir, 'audio'))
             os.mkdir(join(self.output_dir, 'audio_correct_names'))
 
-
     def get_metadata(self):
         metadata = self.sql.get_all_data_about_clips()
-        # metadata['speaker_id'] = 'NAN'
+        
         metadata['filename'] = 'NAN'
         metadata.fillna('NAN', inplace=True)
         
         # The data frame returns a few more columns than desired.
-        # This filters the columns that we really need here.
+        # This filters the columns that we really need.
         metadata = metadata[['id',
- #                           'speaker_id', 
- #                           'filename',
+                            'speaker_id', 
+                            'filename',
                             'client_id',
                             'sentence',
                             'sex',
@@ -86,27 +85,41 @@ class Extractor:
                             'size',
                             'user_agent']]
 
+        # Just a precaution until every row in the database has a speaker_id != null.
+        # Hopefully this won't be a issue anymore once the 700+ speaker_id-less rows in the database have been
+        # taken care of.
+        try:
+            for i in metadata.index:
+                if metadata.at[i, 'speaker_id'] == 'NAN':
+                    raise Exception()
+        except Exception as e:
+            print(f'Row with id: {metadata.at[i, "id"]} does not contain a speaker_id. Aborting....')
+            return False
+
         metadata = self.parse_metadata(metadata)
+
         name = join(self.output_dir, self.metadata_filename)
         self.to_file(name, metadata)
 
-        self.skitamix()
+        return True
 
     def parse_metadata(self, df):
         '''
         Helper function for get_metadata
         '''
+
         # Needed to zero pad the ids
         df = df.astype(str)
 
-        # Preform multible mappings on the metadata dataframe
+        # Perform multiple mappings on the metadata dataframe
         print('Parsing metadata')
         for i in tqdm(df.index):
-            df.at[i, 'id'] = str(df.at[i, 'id']).zfill(7)
-            df.at[i, 'sentence'] = df.at[i, 'sentence'].rstrip()
-            df.at[i, 'dialect'] = dialect_mapping(df.at[i, 'dialect'])
-            df.at[i, 'age'] = age_mapping(df.at[i, 'age'])
-            df.at[i, 'sex'] = gender_mapping(df.at[i, 'sex'])
+            df.at[i, 'id']              = str(df.at[i, 'id']).zfill(7)                          # Pad the id with 0's.
+            df.at[i, 'sentence']        = df.at[i, 'sentence'].rstrip()
+
+            df.at[i, 'dialect']         = dialect_mapping(df.at[i, 'dialect'])
+            df.at[i, 'age']             = age_mapping(df.at[i, 'age'])
+            df.at[i, 'sex']             = gender_mapping(df.at[i, 'sex'])
             df.at[i, 'native_language'] = nationality_mapping(df.at[i, 'native_language'])
 
         # Use the id column as an index
@@ -114,11 +127,11 @@ class Extractor:
         # copying it to a new variable (where the 'id' would be used as an index).
         df.set_index('id', inplace =True)
 
-        # Rename the coloumn sex as gender
+        # Rename the column 'sex' as 'gender'
         df.rename({'sex': 'gender'}, axis='columns', inplace=True)  
 
-        #we use age, gender, langugae and client id to give speakers a speaker id 
-        df['speaker_id'] = create_speaker_ids(df)
+        # We use age, gender, language and client_id to give speakers a speaker_id 
+        # df['speaker_id'] = create_speaker_ids(df)
 
         #Create the filenames
         for i in df.index:
@@ -127,50 +140,6 @@ class Extractor:
         #We no longer need the client_id
         df.drop('client_id', axis=1, inplace=True)
         return df
-
-    def inspect_audio_only_those_with_NAN(self):
-        '''
-        Finds clips that don't have duration or file size and add that to the metadata file.
-
-        We also use a package to examine if clips are empty.
-        '''
-
-        df = pd.read_csv(join(self.output_dir, self.metadata_filename), sep='\t', dtype=str)
-        df.set_index('id', inplace=True)
-
-        recs:dict = {}
-        with open(join(self.output_dir, self.recs_file)) as f_in:
-            for line in f_in:
-                id, filename = line.split('\t')
-                id = id.zfill(6)
-                recs[id] = filename.rstrip()
-        
-        print('Inspecting audio')
-        for i in tqdm(df.index):
-            # We will be downsampling in the next step
-            df.at[i, 'sample_rate'] = 16000
-
-            if df.at[i, 'duration'] == 'NAN':
-                try:
-                    wave, sr = read_audio(join(self.output_dir, 'audio', recs[i]))
-                    df.at[i, 'duration']  = get_duration(wave, sr)
-                except Exception  as e:
-                    print(f"Error working with file {i}\n\n{e}")
-                
-            if df.at[i, 'size'] == 'NAN':
-                try:
-                    df.at[i, 'size'] = getsize(join(self.output_dir, 'audio', recs[i]))
-                except Exception  as e:
-                    print(f"Error working with file {i}\n\n{e}")
-
-            if df.at[i, 'empty'] == 'NAN':
-                try:
-                    df.at[i, 'empty'] = detect_empty_waves(join(self.output_dir, 'audio', recs[i]))
-                except Exception  as e:
-                    print(f"Error working with file {i}\n\n{e}")
-
-        name = join(self.output_dir, self.metadata_filename[:-4] + '_inspect.tsv')
-        self.to_file(name, df)
 
     def inspect_all_audio_files(self):
         '''
@@ -183,9 +152,11 @@ class Extractor:
 
         print('Inspecting audio')
         for i in tqdm(df.index):
+
             # Legend      :   output root    /  corrected names     / speaker id                          / filename (speaker_id-recording_id)
             # Default path:   output         /  audio_correct_names / 00000x                              / 00000x-000000x.wav
             audio_clip = join(self.output_dir, 'audio_correct_names', str(df.at[i, 'speaker_id']).zfill(6), df.at[i, 'filename'])
+            
             try:
                 wave, sr = read_audio(audio_clip)
                 df.at[i, 'duration']  = get_duration(wave, sr)
@@ -203,56 +174,68 @@ class Extractor:
             except Exception as e:
                 print(f"Error working with file {i}\n\n{e}")
 
-        name = join(self.output_dir, self.metadata_filename[:-4] + '_inspect.tsv')
-        self.to_file(name, df)
+        self.to_file(join(self.output_dir, self.metadata_filename[:-4] + '_inspect.tsv'), df)
 
     def to_file(self, name, df):
         df.to_csv(name, header=True, sep='\t')
 
     def parallel_processor(self, function, iterator, n_jobs, chunks=1, units ='files'):
+        '''
+        This function takes download_clips_parallel() as an argument along with the data (iterator) it is supposed to iterate through.
+        '''
+
         results: list = []
         with ThreadPoolExecutor(max_workers=n_jobs) as executor:
-            results =  tqdm(executor.map(
+            results = tqdm(executor.map(
                 function,
                 iterator,
                 chunksize=chunks), 
                 total=len(iterator),
-                unit= ' '+ units)
+                unit=' '+ units)
  
-    def download_clips_parallel(self):
+    def download_clips(self):
+        '''
+        Call this function if you intend to download the clips. It prepares the download process before using 
+        parallel_processor() to download the clips using download_clips_parallel().
+        '''
+
         print('Downloading clips')
         data = self.sql.get_clips_s3_path()
 
-        for i in data:
-            id = str(i['id']).zfill(7)
-            new_filename = self.filenames_skitamix[id]
-            speaker_id = re.sub('-.+','', new_filename) 
+        for row in data:
+            # Ready the entire folder structure before commencing download.
+            if not exists(join(self.output_dir, 'audio_correct_names', row['speaker_id'])):
+                os.mkdir(join(self.output_dir, 'audio_correct_names', row['speaker_id']))
 
-            if not exists(join(self.output_dir, 'audio_correct_names', speaker_id)):
-                os.mkdir(join(self.output_dir, 'audio_correct_names', speaker_id))
+            # self.download_clips_parallel(row)     # Use this line for easier debug experience, by not using threads. Just remember to comment out the call to parallel_processor() below!
 
-        self.parallel_processor(self.download_clips_p, data, self.threads, chunks=250, units ='files')
+        # parallel_processor() takes care of the rest along with download_clips_parallel().
+        self.parallel_processor(self.download_clips_parallel, data, self.threads, chunks=250, units ='files')
 
-    def download_clips_p(self, data):
+        # TODO: Delete output/audio folder when it has become empty. I think this would be the appropriate place to do it, assuming
+        #       that all uuid.wav audio clips have been downsampled and deleted at this point.
+
+    def download_clips_parallel(self, row):
         '''
-        Add description
+        This function is used by parallel_processor() to iterate through the data. Each call to this function, by parallel_processor(),
+        passes a single row of the data - which is fetched in download_clips() - to this function.
         '''
         
-        uuid_filename = self.s3.get_object(join(self.output_dir, 'audio'), data['path'])
-        #new_filname = data['speaker_id'] + '-' + data['id'].zfill(7) + '.wav'
+        # Download the audio clip from S3. It is initially very large and needs downsampling which is done in fix_header().
+        # It also has a temporary filename (uuid) which is fixed during the downsampling process.
+        uuid_filename = self.s3.get_object(join(self.output_dir, 'audio'), row['path'])
 
-        id = str(data['id']).zfill(7)
-        new_filename = self.filenames_skitamix[id]
-        speaker_id = re.sub('-.+','', new_filename) 
-        
-        
-        #self.fix_header(uuid_filename, data['speaker_id'], new_filename)
-        self.fix_header(uuid_filename, speaker_id, new_filename)
+        # The new filename, after downsampling, will be on the form speaker_id-id.wav
+        # Example: 012522-15233.wav
+        new_filename = row['speaker_id'] + '-' + str(row['id']).zfill(7) + '.wav'
 
+        # Downsample the temporary file and copy the result to a new folder where all of the audio files are organised.
+        self.fix_header(uuid_filename, row['speaker_id'], new_filename)
+
+        # Delete the temporary audio file.
         os.remove(join(self.output_dir, 'audio', uuid_filename))
 
-
-    def fix_header(self, old_filename, sub_folder, new_filname):
+    def fix_header(self, old_filename, sub_folder, new_filename):
         """
         Fix headers in the wav files and downsample to 16khz.
         We also add the clips in a folder structure that is.
@@ -268,7 +251,7 @@ class Extractor:
                 speaker_id n/
         """
 
-        res = sp.run(f'ffmpeg -hide_banner -loglevel warning -i "{self.output_dir}/audio/{old_filename}" -ar 16000 "{self.output_dir}/audio_correct_names/{sub_folder}/{new_filname}"',\
+        res = sp.run(f'ffmpeg -hide_banner -loglevel warning -i "{self.output_dir}/audio/{old_filename}" -ar 16000 "{self.output_dir}/audio_correct_names/{sub_folder}/{new_filename}"',\
                 shell=True,
                 stdout=sp.PIPE,
                 stderr=sp.PIPE)
