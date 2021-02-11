@@ -21,9 +21,17 @@ class Extractor:
         self.threads = args.threads
         self.overwrite = args.overwrite
         self.ids_to_get = args.ids
+
+        # MEC mode variables.
+        self.mec = args.metadata_existing_clips
+        self.mec_filename = 'metadata_all_clips.tsv'      if self.mec else None
+        self.mec_path = args.metadata_existing_clips_path if self.mec else None
         
         self.s3 = S3()
-        self.sql = MySQL(self.open_ids_file())
+
+        # If in MEC mode, get all ids from already downloaded audio files.
+        # Otherwise, read ids to get from text file.
+        self.sql = MySQL(self.open_ids_file() if not self.mec else self.mec_get_ids())
 
         self.ensure_dirs()
 
@@ -59,6 +67,24 @@ class Extractor:
             os.mkdir(self.output_dir)
             os.mkdir(join(self.output_dir, 'audio'))
             os.mkdir(join(self.output_dir, 'audio_correct_names'))
+
+    def mec_get_ids(self):
+        '''MEC mode: Gets ids of clips that have already been downloaded and returns a list of them.'''
+
+        lis:list = []
+
+        for root, dirs, audio_files in os.walk(self.mec_path):
+            for audio_file in audio_files:
+                # For each file, isolate its id and append to list.
+
+                # How we isolate each file's id:
+                # 
+                # '006006-0047496.wav' -> ['006006', '0047496.wav'] -> ['0047496', 'wav'] -> '0047496' -> 47496 -> '47496'
+
+                lis.append(int(audio_file.split('-')[1].split('.')[0]))
+
+        lis.sort()  # No need to sort perhaps?
+        return list(map(lambda x: str(x) + '\n', lis))
 
     def get_metadata(self):
         metadata = self.sql.get_all_data_about_clips()
@@ -198,6 +224,10 @@ class Extractor:
         Call this function if you intend to download the clips. It prepares the download process before using 
         parallel_processor() to download the clips using download_clips_parallel().
         '''
+
+        # MEC (metadata for existing clips) mode skips the download step.
+        if self.mec:
+            return
 
         print('Downloading clips')
         data = self.sql.get_clips_s3_path()
