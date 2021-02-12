@@ -1,34 +1,38 @@
-Needs an update
+# Script maker 
 
+This tool is used to create the script's that are used on (samrómur.is)[www.samromur.is]. It has scripts ready so that it works with the [Icelandix Gigaword Corpus](https://clarin.is/) but is designed to be modular so with relative ease and text could be processed with the tool. We process the text step by step and the output of each step is stored in its own text file. The output are files that contain a <sentences>\t<origin-tag>. The origin tag refers to which subset of the Gigaword corpus the sentence was taken from e.g. Morgunbladid, Althingi etc. 
 
-Text extractor that extracts parlimentary speeches from xml files in the Icelandix Gigaword Corpus (https://clarin.is/). It also gets the speakers name and title of each speech. It then finds the authors corresponding parliamentary party. 
+The scripts made for (Samrómur)[www.samrómur.is] are (https://github.com/aime-island/scripts_for_samromur)
 
-To run this script please make sure you have all the necessary packages. Run the command: 
+The pipeline is as follows:
+    parser.read_corpus() - This step reads through the .xml files found in the Gigaword Corpus.
+    parser.parse_text() - Some regex magic to parse the output of the previous step.
+    parser.allowed_symbals() - We only keep the sentences that contained our defined allowed characters and symbols.
+    parser.right_length() - We only keep the sentences that are of the right length, this is a parameter. 
+    parser.only_words_in_BIN() - We only keep the sentences that are that contain words that are in BÍN.
+    parser.remove_sentences_with_bad_words() - This especially useful for creating scripts for children, we have a list of inappropriate words. 
+    parser.right_length_of_word() - We only keep the sentences with words that are of the right length, this is also a parameter.
 
-		Directory: .\code\Althingi_data_prep\
-		pip install –r requriments.txt
+# Installation
+* Python > 3.5
+```
+pip3 install -r requirements.txt
+```
+## Resources 
+The Icelandic Gigaword Corpus]https://clarin.is/) 
 
-To start the extraction process make run the script extractor.py. It has three parameters 
-		--data1, -d1: Which is the directory to the Althingi xml files. The script crawls every subfolder of this directory and creates a list with directory to individual xml files
+The file KRISTINsnid.csv.zip is available here(https://bin.arnastofnun.is/gogn/mimisbrunnur/) 
 
-		--data2, -d2: Directory to the file “thingmenn.txt” which includes the list of congress men and their corresponding parliamentary party.
-		
-		-n_iobs, -n: Integer with the number of parallel processes. Recommended is n= #of cores -1.
+create the folder util/data and unzip the file there.
 
-The command should look something like this:
+# Running the tool
 
-		python3 filter.py -rmh /data/text/risamalheild/2018/rmh1/textasafn_arnastofnun/2008 -c test -smax 5 -wmax 6
+To read about the parameters run python3 script_maker.py --help
+```
+python3 create_script.py -rmh <Path-to-the-folder-in the Gigaword corpus> -smin 5 -smax 10 -wmax 10 --code_name test
+```
 
-Resources needed outside of this repo 
+# Authors
+Reykjavik University
 
-	Run:
-	
-	mkdir -p util/data
-
-	wget -o data/bad_words.txt https://github.com/aime-island/inappropriate_words/blob/master/inappropriate_words?raw=true
-
-	wget https://bin.arnastofnun.is/django/api/nidurhal/?file=ordmyndir.txt.zip
-
-	unzip index.html?file=ordmyndir.txt.zip
-
-	cp ordmyndir.txt data/ordmyndir.txt
+David Erik Mollberg davidemollberg@gmail.com
