@@ -84,6 +84,8 @@ class Extractor:
                 lis.append(int(audio_file.split('-')[1].split('.')[0]))
 
         lis.sort()  # No need to sort perhaps?
+
+        # Change each id to string appended with a newline before returning.
         return list(map(lambda x: str(x) + '\n', lis))
 
     def get_metadata(self):
@@ -124,7 +126,7 @@ class Extractor:
 
         metadata = self.parse_metadata(metadata)
 
-        name = join(self.output_dir, self.metadata_filename)
+        name = join(self.output_dir, (self.metadata_filename if not self.mec else self.mec_filename))
         self.to_file(name, metadata)
 
         return True
@@ -173,7 +175,7 @@ class Extractor:
         We also use a package to examine if clips are empty.
         '''
         
-        df = pd.read_csv(join(self.output_dir, self.metadata_filename), sep='\t', dtype=str)
+        df = pd.read_csv(join(self.output_dir, (self.metadata_filename if not self.mec else self.mec_filename)), sep='\t', dtype=str)
         df.set_index('id', inplace=True)
 
         print('Inspecting audio')
@@ -181,7 +183,8 @@ class Extractor:
 
             # Legend      :   output root    /  corrected names     / speaker id                          / filename (speaker_id-recording_id)
             # Default path:   output         /  audio_correct_names / 00000x                              / 00000x-000000x.wav
-            audio_clip = join(self.output_dir, 'audio_correct_names', str(df.at[i, 'speaker_id']).zfill(6), df.at[i, 'filename'])
+            audio_clip = join(self.output_dir, 'audio_correct_names', str(df.at[i, 'speaker_id']).zfill(6), df.at[i, 'filename']) if not self.mec \
+                    else join(self.mec_path, str(df.at[i, 'speaker_id']).zfill(6), df.at[i, 'filename'])
             
             try:
                 wave, sr = read_audio(audio_clip)
@@ -200,7 +203,7 @@ class Extractor:
             except Exception as e:
                 print(f"Error working with file {i}\n\n{e}")
 
-        self.to_file(join(self.output_dir, self.metadata_filename[:-4] + '_inspect.tsv'), df)
+        self.to_file(join(self.output_dir, (self.metadata_filename if not self.mec else self.mec_filename)[:-4] + '_inspect.tsv'), df)
 
     def to_file(self, name, df):
         df.to_csv(name, header=True, sep='\t')
@@ -227,7 +230,10 @@ class Extractor:
 
         # MEC (metadata for existing clips) mode skips the download step.
         if self.mec:
+            print('MEC mode on - skipping download procedure...')
             return
+
+        input('Download will commence now\nHit "Enter" to continue...')     # Put this here for precaution.
 
         print('Downloading clips')
         data = self.sql.get_clips_s3_path()
