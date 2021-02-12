@@ -7,7 +7,7 @@ def create_parser():
         formatter_class=argparse.MetavarTypeHelpFormatter)
 
     parser.add_argument(
-        '-rmh', '--process_rmh', required=False, default=None, type=str, help='path to data folder to extract, in  the .xml format')
+        '-rmh', '--process_rmh', required=False, default=None, type=str, help='path to data folder to extract, in  the .xml format. The script crawls all the subfolder')
 
     parser.add_argument(
         '-t', '--process_text', required=False, default=None, type=str, help='path to data text file to be normalized')
