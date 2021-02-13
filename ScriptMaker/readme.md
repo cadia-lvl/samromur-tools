@@ -5,13 +5,12 @@ This tool is used to create the script's that are used on (samrómur.is)[www.sam
 The scripts made for (Samrómur)[www.samrómur.is] are (https://github.com/aime-island/scripts_for_samromur)
 
 The pipeline is as follows:
-    parser.read_corpus() - This step reads through the .xml files found in the Gigaword Corpus.
-    parser.parse_text() - Some regex magic to parse the output of the previous step.
-    parser.allowed_symbals() - We only keep the sentences that contained our defined allowed characters and symbols.
-    parser.right_length() - We only keep the sentences that are of the right length, this is a parameter. 
-    parser.only_words_in_BIN() - We only keep the sentences that are that contain words that are in BÍN.
-    parser.remove_sentences_with_bad_words() - This especially useful for creating scripts for children, we have a list of inappropriate words. 
-    parser.right_length_of_word() - We only keep the sentences with words that are of the right length, this is also a parameter.
+* parser.read_corpus() - This step reads through the .xml files found in the Gigaword Corpus.
+* parser.parse_text() - Some regex magic to parse the output of the previous step.
+* parser.allowed_symbals() - We only keep the sentences that contained our defined allowed characters and symbols.* parser.right_length() - We only keep the sentences that are of the right length, this is a parameter. 
+* parser.only_words_in_BIN() - We only keep the sentences that are that contain words that are in BÍN.
+* parser.remove_sentences_with_bad_words() - This especially useful for creating scripts for children, we have a list of inappropriate words. 
+* parser.right_length_of_word() - We only keep the sentences with words that are of the right length, this is also a parameter.
 
 # Installation
 * Python > 3.5
