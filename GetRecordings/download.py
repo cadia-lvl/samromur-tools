@@ -1,3 +1,5 @@
+from os.path import join
+
 from modules.extractor import Extractor
 import argparse
 
@@ -20,6 +22,12 @@ if __name__ == '__main__':
     
     parser.add_argument(
         '-m', '--metadata', required=False, default='metadata.tsv', type=str, help='Name of the metadata file')
+
+    parser.add_argument(
+        '-mec', '--metadata_existing_clips', required=False, default=False, type=boolean_string, help='Turns on MEC mode. Gets metadata for all existing clips. Inspects existings clips afterwards. The download step is skipped.')
+
+    parser.add_argument(
+        '-mecp', '--metadata_existing_clips_path', required=False, default=join('output_as_of_050221', 'audio_correct_names'), type=str, help='Path to the root of the clips folder, where the speaker_id folders are located.')
 
     parser.add_argument(
         '-t', '--threads', required=False, default='5', type=int, help='Number of threads to use when downloading')
