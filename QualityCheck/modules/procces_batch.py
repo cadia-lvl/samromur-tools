@@ -15,72 +15,22 @@ from modules.MarosijoModule import MarosijoTask
 log.basicConfig(level=log.ERROR,
     filename='log/log')
 
-def batch_loader1(args):
-    '''
-    Creates batches to review, the size of each batch can be change in config.py.
-    Opens the metadata file for the samromur corpus and that is provided in config.py. 
-    '''
-    
-    ids = get_ids(args.ids)
-    df = pd.read_csv(join(conf['metadata']), sep='\t', dtype='str')
-    df = df[df['id'].isin(ids)]
-    df.set_index('id', inplace=True)
-    data = []
-    
-    for i in df.index:
-        sentence = df.at[i, 'sentence_norm']
-        data.append({"tokenId": i, 
-                    "recPath": join(conf['recs'], df.at[i, 'filename']),
-                    "recId": i,
-                    "token": sentence,
-                    "valid": df.at[i, 'is_valid']})
-
-    #Hack for parallelzation
-    data = [data[x:x+args.batch_size] for x in range(0, len(data), args.batch_size)]
-
-    for batch in data:
-        print(len(batch))
-
-    log.info(f"\nThere are {len(ids)} in the provided id's file")
-    
-    if not exists(conf['reports_path']):
-        mkdir(conf['reports_path'])
-
-    with open(join(conf['reports_path'], f"{args.name}.json"), mode='w', encoding='utf-8' ) as f_out:
-        f_out.write('[\n')
-        for batch in data:
-            batch_name = shortuuid.uuid()
-
-            #Graphs á að vera listi strengur með <tokenID>\t<token>
-            graphs = [f"{line['recId']}\t{line['token']}" for line in batch]
-            genGraphs(graphs, batch_name)
-
-            marosijo = MarosijoTask(modelPath=conf['model'], u_prefix=batch_name)
-            
-            report = marosijo.processBatch(batch)
-
-            remove(join('modules', 'local', 'temp', f'{batch_name}_graphs.scp'))
-            remove(join('modules', 'local', 'temp', f'{batch_name}_graphs.ark'))
-
-            json.dump(report, ensure_ascii=False, fp=f_out, indent=4)
-        f_out.write('{}]') #Hack to close of the json file in the correct format
-
 def batch_loader(args):
     '''
     Creates batches to review, the size of each batch can be change in config.py.
     Opens the metadata file for the samromur corpus and that is provided in config.py. 
     '''
     
-    ids = get_ids(args.ids)
-    df = pd.read_csv(join(conf['metadata']), sep='\t', dtype='str')
-    df = df[df['id'].isin(ids)]
+    ids = get_ids(args.ids)                                                 # Read ids from file                                        
+    df = pd.read_csv(join(conf['metadata']), sep='\t', dtype='str')         # Read metadata TSV file
+    df = df[df['id'].isin(ids)]                                             # From TSV file (now a dataframe), isolate rows that have a match in the ids file
     df.set_index('id', inplace=True)
     data = []
-    
+
     for i in df.index:
         sentence = df.at[i, 'sentence_norm']
         data.append({"tokenId": i, 
-                    "recPath": join(conf['recs'], df.at[i, 'filename']),
+                    "recPath": join(conf['recs'], df.at[i, 'speaker_id'], df.at[i, 'filename']),        # Added speaker_id.
                     "recId": i,
                     "token": sentence,
                     "valid": df.at[i, 'is_valid']})
@@ -116,29 +66,6 @@ def parallel_processor(function, iterator, name, n_jobs, chunks=1, units ='files
             f_out.write('{}]') #Hack to close of the json file in the correct format
 
 
-def create_and_decode_test(data:list):
-    ''' 
-    make this work the write
-    '''
-    u_prefix = shortuuid.uuid()
-
-    #Graphs á að vera listi strengur með <tokenID>\t<token>
-    graphs = [f"{data['recId']}\t{data['token']}"]
-    genGraphs(graphs, u_prefix)
-    
-    try:
-        marosijo = MarosijoTask(modelPath=conf['model'], u_prefix=u_prefix)
-        report = marosijo.processBatch([data])
-    except expression as e:
-        print(e)
-        report = []
-    
-    remove(join('modules', 'local', 'temp', f'{u_prefix}_graphs.scp'))
-    remove(join('modules', 'local', 'temp', f'{u_prefix}_graphs.ark'))
-    
-    return report
-
-
 def get_ids(path: str) -> list:
     '''
     Load a file with the ids to go over.
@@ -148,7 +75,7 @@ def get_ids(path: str) -> list:
     items =set()
     with open(path) as f_in:
         for line in f_in:
-            items.add(str(line.rstrip()))
+            items.add(str(line.rstrip()).zfill(7))
     return items
 
 def create_and_decode(data:list):

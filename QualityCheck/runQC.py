@@ -1,3 +1,5 @@
+"""NOTE: Run outside of Conda environment"""
+
 from argparse import ArgumentParser
 import json
 from os.path import join
@@ -27,8 +29,8 @@ if __name__ == '__main__':
     parser.add_argument('--n_jobs', type=int, default=5, help='arg for the number of jobs do to in parallel')
     args = parser.parse_args()
     
-    #batch_loader(args)
-
+    batch_loader(args)
     parse_reports(args)
+
     end = time.time()
     print(f"Run time {(end - start)/60} min")

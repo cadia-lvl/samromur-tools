@@ -1,7 +1,4 @@
-import tokenizer
-from os.path import join, basename
-from re import sub
-from tqdm import tqdm
+from os.path import join
 import pandas as pd
 from re import sub
 
@@ -17,7 +14,7 @@ def normalize_sentence(s):
     s = s.rstrip()
     return s
 
-path_to_previous_metadata_file = '/home/derik/work/samromur-tools/GetRecordings/output_311220/metadata_2020-12-29.tsv'
+path_to_previous_metadata_file = '/home/smarig/work/h1/samromur-data/as_of_050221/050221_metadata/metadata_all_clips_inspect_scored.tsv'
 
 arch = 'normalized_files'
 
@@ -45,8 +42,8 @@ for i in df.index:
     #if i in v1:
     #   df.at[i, 'released'] = 'V1'
 
-df = df[['speaker_id', 'filename', 'is_valid', 'empty', 'gender', 'age', 'native_language',\
-     'duration', 'sample_rate', 'size','sentence', 'sentence_norm', 'released', 'user_agent']]
+df = df[['speaker_id', 'filename', 'sentence', 'sentence_norm', 'gender', 'age', 'native_language', 'dialect', 'created_at', \
+         'marosijo_score', 'released', 'is_valid', 'empty', 'duration', 'sample_rate', 'size', 'user_agent']]
 
 with open(join(arch, 'needs_fixing'), 'w') as f_out:
     for line in text:
