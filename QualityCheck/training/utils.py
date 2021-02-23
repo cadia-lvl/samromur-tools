@@ -33,15 +33,6 @@ def prep_data(conf):
     df = pd.read_csv(join(conf['metadata']), sep='\t', dtype='str')
     df.set_index('id', inplace=True)
 
-    # df['is_valid'] = pd.to_numeric(df['is_valid'], downcast='integer')
-    # print(len(df[(df.is_valid != 'NAN') & (df.is_valid=='1.0') | (df.is_valid=='1')]))
-
-
-    """ Var tilgangslaust eftir að g2p var skipt út (18.02.21)
-    for i in tqdm(df.index, unit='lines'):
-        for tok in df.at[i, 'sentence_norm'].split(' '):
-            tokens.add(tok)"""
-
     df_acoustic = df[df['is_valid']=='1.0'][-50000:]                # Last 50.000
     print(f"{len(df_acoustic)} being used for acoustic training")
 
@@ -81,10 +72,6 @@ def create_phonemes_file():
         for phone in sorted(list(phones)):
             f_out.write(phone+'\n')
 
-
-def run_g2p_on_tokens(conf):
-    subprocess.call(f"g2p.py --apply {token_file} --model {conf['g2p_model']} --encoding='UTF-8' > {lexicon_file}", shell=True)
-    create_phonemes_file()
 
 def train_acoustic(conf):
     create_phonemes_file()
