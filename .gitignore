@@ -8,6 +8,7 @@ reports/
 recordings/
 modules/local/
 modules/local_v1/
+QualityCheck/modules/local/
 
 training/data/
 
@@ -24,6 +25,13 @@ training/model/
 data/
 results/
 
+log/
+
+batches/
+ids/
+logs_archive/
+
+useful_commands.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

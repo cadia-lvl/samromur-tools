@@ -5,8 +5,6 @@ from config import conf
 
 if __name__ == '__main__':
     
-    #prep_data(conf)
+    prep_data(conf)
     
-    #run_g2p_on_tokens(conf)
-
     train_acoustic(conf)

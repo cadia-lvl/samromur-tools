@@ -2,6 +2,7 @@ from os.path import join, exists
 from os import makedirs
 from os import system
 
+
 def create_folders_and_files(conf, data_folder, scripts, kaldi_datadir_path):
     steps=join(scripts,'steps')
     utils=join(scripts,'utils')
