@@ -10,16 +10,18 @@ modules/local/
 modules/local_v1/
 QualityCheck/modules/local/
 
+PrepMetadataFile/normalization/normalized_files
+
 training/data/
 
-training/scripts/conf/
-training/scripts/data/
-training/scripts/exp/
-training/scripts/utils
-training/scripts/steps
-training/scripts/cmd.sh
-training/scripts/path.sh
-training/scripts/mfcc
+QualityCheck/training/scripts/conf/
+QualityCheck/training/scripts/data/
+QualityCheck/training/scripts/exp/
+QualityCheck/training/scripts/utils
+QualityCheck/training/scripts/steps
+QualityCheck/training/scripts/cmd.sh
+QualityCheck/training/scripts/path.sh
+QualityCheck/training/scripts/mfcc
 
 training/model/
 data/
