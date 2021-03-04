@@ -26,6 +26,7 @@ python3 runQC.py --name $NAME --ids $IDS --n_jobs 12 --batch_size 5
 # 240221 #1: sbatch -o qc_slurm_logs/240221_qc_first_200k.log runQC_slurm.sh 240221_qc_first_200k batches/220221_ids_first_200k
 # 260221 #1: sbatch -o qc_slurm_logs/260221_qc_150k_218042-895299.log runQC_slurm.sh 260221_qc_150k_218042-895299 batches/260221_qc_150k_218042-895299
 # 010321 #1: sbatch -o qc_slurm_logs/010321_qc_150k_218042-1099684.log runQC_slurm.sh 010321_qc_150k_218042-1099684 batches/010321_qc_150k_218042-1099684
+# 040321 #1: sbatch -o qc_slurm_logs/040321_qc_100k_218042-1192490.log runQC_slurm.sh 040321_qc_100k_218042-1192490 batches/040321_qc_100k_218042-1192490
 
 
 # python3 runQC.py --name 260221_qc_150k_218042-895299 --ids batches/260221_qc_150k_218042-895299 --n_jobs 12 --batch_size 5
