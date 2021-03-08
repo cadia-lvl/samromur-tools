@@ -28,5 +28,8 @@ python3 runQC.py --name $NAME --ids $IDS --n_jobs 12 --batch_size 5
 # 010321 #1: sbatch -o qc_slurm_logs/010321_qc_150k_218042-1099684.log runQC_slurm.sh 010321_qc_150k_218042-1099684 batches/010321_qc_150k_218042-1099684
 # 040321 #1: sbatch -o qc_slurm_logs/040321_qc_100k_218042-1192490.log runQC_slurm.sh 040321_qc_100k_218042-1192490 batches/040321_qc_100k_218042-1192490
 
+# NOTE, 040321: Ég náði að keyra þetta upp með sbatch á master en ekki á r1_prep. Mjög skrítið. Er meira að segja búinn að merge-a local
+#               master yfir á r1_prep. Breytir engu. Veit ekki til þess að ég hafi átt við neitt sem eigi að skemma nokkuð. Fæ semsagt
+#               sh command not found villuna á GenGraphs, línu 56.
 
 # python3 runQC.py --name 260221_qc_150k_218042-895299 --ids batches/260221_qc_150k_218042-895299 --n_jobs 12 --batch_size 5
