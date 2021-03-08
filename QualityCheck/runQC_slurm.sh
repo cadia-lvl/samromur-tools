@@ -5,9 +5,6 @@
 #SBATCH --mem=12G
 #SBATCH --cpus-per-task=12
 
-export KALDI_ROOT=/home/derik/work/kaldi
-#SBATCH --export=PATH=$KALDI_ROOT/src/ivectorbin:$PWD/utils/:$KALDI_ROOT/src/bin:$KALDI_ROOT/src/chainbin:$KALDI_ROOT/src/online2bin:$KALDI_ROOT/src/onlinebin:$KALDI_ROOT/tools/openfst/bin:$KALDI_ROOT/src/fstbin/:$KALDI_ROOT/src/gmmbin/:$KALDI_ROOT/src/featbin/:$KALDI_ROOT/src/lm/:$KALDI_ROOT/src/sgmmbin/:$KALDI_ROOT/src/sgmm2bin/:$KALDI_ROOT/src/fgmmbin/:$KALDI_ROOT/src/latbin/:$KALDI_ROOT/src/nnet3bin::$KALDI_ROOT/src/nnetbin:$KALDI_ROOT/src/nnet2bin/:$KALDI_ROOT/src/kwsbin:$PWD:$PATH:$KALDI_ROOT/src/fstbin
-
 if [[ $# -eq 0 ]] ; then
     echo 'Please provide a process name and a path to the ids to check.'
     exit 0
@@ -28,9 +25,3 @@ python3 runQC.py --name $NAME --ids $IDS --n_jobs 12 --batch_size 5
 # 010321 #1: sbatch -o qc_slurm_logs/010321_qc_150k_218042-1099684.log runQC_slurm.sh 010321_qc_150k_218042-1099684 batches/010321_qc_150k_218042-1099684
 # 040321 #1: sbatch -o qc_slurm_logs/040321_qc_100k_218042-1192490.log runQC_slurm.sh 040321_qc_100k_218042-1192490 batches/040321_qc_100k_218042-1192490
 # 080321 #1: sbatch -o qc_slurm_logs/080321_qc_100k_218042-1336566.log runQC_slurm.sh 080321_qc_100k_218042-1336566 batches/080321_qc_100k_218042-1336566
-
-# NOTE, 040321: Ég náði að keyra þetta upp með sbatch á master en ekki á r1_prep. Mjög skrítið. Er meira að segja búinn að merge-a local
-#               master yfir á r1_prep. Breytir engu. Veit ekki til þess að ég hafi átt við neitt sem eigi að skemma nokkuð. Fæ semsagt
-#               sh command not found villuna á GenGraphs, línu 56.
-
-# python3 runQC.py --name 260221_qc_150k_218042-895299 --ids batches/260221_qc_150k_218042-895299 --n_jobs 12 --batch_size 5

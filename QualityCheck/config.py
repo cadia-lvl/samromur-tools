@@ -3,7 +3,7 @@ from os.path import join
 
 conf = dict(
     #Needed both for the training and evaluation steps
-    kaldi_root = '/home/derik/work/kaldi', 
+    kaldi_root = '/opt/kaldi',  # Alternative path: '/home/derik/work/kaldi'
     sample_rate = 16000,
 
     #Path to recordings and subsequent metadata file. Used to train the acustic monophone model
