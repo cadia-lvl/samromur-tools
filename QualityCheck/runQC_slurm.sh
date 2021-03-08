@@ -27,6 +27,7 @@ python3 runQC.py --name $NAME --ids $IDS --n_jobs 12 --batch_size 5
 # 260221 #1: sbatch -o qc_slurm_logs/260221_qc_150k_218042-895299.log runQC_slurm.sh 260221_qc_150k_218042-895299 batches/260221_qc_150k_218042-895299
 # 010321 #1: sbatch -o qc_slurm_logs/010321_qc_150k_218042-1099684.log runQC_slurm.sh 010321_qc_150k_218042-1099684 batches/010321_qc_150k_218042-1099684
 # 040321 #1: sbatch -o qc_slurm_logs/040321_qc_100k_218042-1192490.log runQC_slurm.sh 040321_qc_100k_218042-1192490 batches/040321_qc_100k_218042-1192490
+# 080321 #1: sbatch -o qc_slurm_logs/080321_qc_100k_218042-1336566.log runQC_slurm.sh 080321_qc_100k_218042-1336566 batches/080321_qc_100k_218042-1336566
 
 # NOTE, 040321: Ég náði að keyra þetta upp með sbatch á master en ekki á r1_prep. Mjög skrítið. Er meira að segja búinn að merge-a local
 #               master yfir á r1_prep. Breytir engu. Veit ekki til þess að ég hafi átt við neitt sem eigi að skemma nokkuð. Fæ semsagt
