@@ -17,7 +17,7 @@ lexicon_file=join(data_folder, 'lexicon.txt')
 phonemes_file=join(data_folder, 'phonemes.txt')
 
 
-def prep_data(conf):
+def prep_data(conf, ids):
     '''
     Prep Kaldi files.
     '''
@@ -31,11 +31,13 @@ def prep_data(conf):
 
     tokens = set()
     df = pd.read_csv(join(conf['metadata']), sep='\t', dtype='str')
-    df.set_index('id', inplace=True)
 
-    df_acoustic = df[df['is_valid']=='1.0'][-50000:]                # Last 50.000
+    # Filter ids by ids in id file.
+    df_acoustic = df[df['id'].isin(ids)]
     print(f"{len(df_acoustic)} being used for acoustic training")
 
+    df.set_index('id', inplace=True)
+    df_acoustic.set_index('id', inplace=True)
     for i in tqdm(df_acoustic.index, unit='lines'):
         utt_id = df.at[i, 'filename'][:-4]
         full_rec_path = join(conf['recs'], df.at[i, 'speaker_id'], df.at[i, 'filename'])
@@ -47,7 +49,7 @@ def prep_data(conf):
     wavscp.close()
     utt2spk.close()
 
-    df_acoustic.to_csv(join(data_folder, 'metadata_accoustic.tsv'), sep='\t', index=False)
+    df_acoustic.to_csv(join(data_folder, 'metadata_accoustic.tsv'), sep='\t')
 
     with open(token_file, 'w') as f_out:
         for tok in sorted(list(tokens)):

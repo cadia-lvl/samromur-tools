@@ -4,6 +4,7 @@
 
 #SBATCH --mem=12G
 #SBATCH --cpus-per-task=12
+#SBATCH --nodelist=terra
 
 if [[ $# -eq 0 ]] ; then
     echo 'Please provide a process name and a path to the ids to check.'
@@ -26,3 +27,5 @@ python3 runQC.py --name $NAME --ids $IDS --n_jobs 12 --batch_size 5
 # 040321 #1: sbatch -o qc_slurm_logs/040321_qc_100k_218042-1192490.log runQC_slurm.sh 040321_qc_100k_218042-1192490 batches/040321_qc_100k_218042-1192490
 # 080321 #1: sbatch -o qc_slurm_logs/080321_qc_100k_218042-1336566.log runQC_slurm.sh 080321_qc_100k_218042-1336566 batches/080321_qc_100k_218042-1336566
 # 100321 #1: sbatch -o qc_slurm_logs/100321_qc_42k_218042-1397007.log runQC_slurm.sh 100321_qc_42k_218042-1397007 batches/100321_qc_42k_218042-1397007
+
+# 240321 #1: sbatch -o qc_slurm_logs/240321_imprv_att01_1250.log runQC_slurm.sh 240321_imprv_att01_1250 batches/improvement/240321_imprv_att01_1250
