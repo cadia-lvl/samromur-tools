@@ -1,43 +1,67 @@
-# Samrómur
+# GetRecordings
+This module enables easy gathering of all Samrómur related data. It can be used to download either a predetermined subset of data or the entirety of it. The data - which is collected on Samrómur and can be downloaded using these tools - is obviously the audio clips but accompanying the clips are their metadata which these tools are capable of getting as well.  
+The main goal of this tool is to enable developers to get large amounts of data in bulk -  eliminating the tediousness and slow progress of manually downloading one clip at a time. It also handily gathers the exact metadata needed for the set of clips which was selected for download.
 
-Version 0.9.
-Published 01/06/2020
+# Table of Contents
+- [GetRecordings](#getrecordings)
+- [Table of Contents](#table-of-contents)
+- [Installation](#installation)
+- [Running](#running)
+  - [Small batches](#small-batches)
+  - [Larger batches](#larger-batches)
+  - [Arguments](#arguments)
+  - [Credentials](#credentials)
+- [Files and folders](#files-and-folders)
+- [Authors/Credit](#authorscredit)
+  - [Acknowledgements](#acknowledgements)
 
-Samrómur is a crowd-sourced speech corpus in Icelandic. This is the first version of the corpus. The version contains 100.000 validated utterances from adult speakers. The age and gender distribution are as follows:
+# Installation
+The following Python packages are required for this module:
+* boto3
+* mysql-connector-python
+* pandas
+* tqdm
+* uuid
+* numpy
+* soundfile
+* pydub
 
-[Bæta inn tölum hér]
+They are also listed in requirements.txt. Therefore, you can easily install all of them by running the command `pip install -r requirements.txt`.
 
-# The directory
-samromur
-	/audio
-		
-	/metadata.tsv
-	/transcripts.tsv
+# Running
+This module consists of five submodules which have their respective purposes. It is run via download.py which serves as an interface for GetRecordings and accepts arguments to tweak a variety of options as needed. The main submodule is extractor.py which contains all of the necessary functions while the others are, although necessary, support submodules.
 
-The directory /audio contains all the audio files. They are WAV formatted with a sample rate of 16khz and a bit depth of 16. 
+## Small batches
+If you intend to download a small handful of clips, it is recommended to simply run download.py using `python3 download.py` with arguments as desired.
 
-Each line in the metadata.tsv has a corresponding audio file. There are 9 columns, they are:
+## Larger batches
+As the downloading process can become quite time and resource consuming - if you are working on a Linux cluster - it is recommended that you use workload manager such as Slurm. If you are using Slurm, you can use run.sh using `sbatch run.sh`. You can freely alter the Slurm parameters and download.py arguments in run.sh as needed.
 
-speaker_id -    An integer value for the speaker that donated this voice sample. The amount of clips speakers donate varies from just a few clips to hundreds or thousands. The speaker_id is not a perfect indicator as some speakers might be counted together under the same integer and the same speaker might have a few speaker ids. This because the 
-speaker_id is derived from the client_id of the device used to record and other demographic information provided.
-sex -   The gender of the speaker. It can be male, female or other. 
-age -   The age of the speaker.
-native_language -   The native language of the speaker.
-duration    -   Duration of the audio clip.
-orginal_sample_rate -   The sample rate used while recording the audio clip.
-sample_rate -   The sample rate of the audio clip in the corpus
-audio_file -    The name of the audio file.
-sentence -  The transcript of the recording.
+## Arguments
+Please refer to the descriptions of each argument in download.py. If anything is unclear, feel free to contact David Erik or Smári Freyr.
 
-## About the corpus
-The Samrómur speech corpus is a crowded-sourced corpus. Volunteers donated there voice by using the website [Samrómur](www.samromur.is). The collection effort started in autumn 2019 and is on-going as of this publication. 
+## Credentials
+User credentials are required for access to the cloudbased data. For obvious reasons, these credentials are not stored on the GitHub repository. Please contact David Erik or Smári Freyr for the credentials file. It should be placed in the root of this module.
 
-The work is funded by the ministry of education, managed by  Almannarómur - Miðstöð máltækni, an NGO, and executed by the Language and Voice lab in Reykjavik University 
+# Files and folders
+- root
+  - Contains the files needed for running
+    - download.py
+    - run.sh
+    - requirements.txt for dependency installation
+- modules
+  - Contains the submodules of GetRecordings
+- utils
+  - Contains miscellaneous files
+    - config.py for credentials access
+  - oto
+    - (O)ne (t)ime (o)nly scripts that perform something useful regarding the downloaded data but might or might not be needed again.
 
+# Authors/Credit
+Reykjavik University
 
+- David Erik Mollberg <david.e.mollberg@gmail.com>
+- Smári Freyr Guðmundsson <smarig@ru.is>
 
-## License
-This work is licensed under a [Creative Commons Attribution 4.0 International
-License][cc-by].
-
-[cc-by]: http://creativecommons.org/licenses/by/4.0/
+## Acknowledgements
+"This project was funded by the Language Technology Programme for Icelandic 2019-2023. The programme, which is managed and coordinated by [Almannarómur](https://almannaromur.is/), is funded by the Icelandic Ministry of Education, Science and Culture.

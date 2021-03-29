@@ -15,16 +15,16 @@ if __name__ == '__main__':
         return s == 'True'
 
     parser.add_argument(
-        '-o', '--output', required=False, default='output', type=str, help='output path')
+        '-o', '--output', required=False, default='output', type=str, help='Output path')
     
     parser.add_argument(
         '-i', '--ids', required=False, default='recs_to_download.txt', type=str, help='File with a list of ids of recs to get')
     
     parser.add_argument(
-        '-m', '--metadata', required=False, default='metadata.tsv', type=str, help='Name of the metadata file')
+        '-m', '--metadata', required=False, default='metadata.tsv', type=str, help='Name of the output metadata file')
 
     parser.add_argument(
-        '-mec', '--metadata_existing_clips', required=False, default=False, type=boolean_string, help='Turns on MEC mode. Gets metadata for all existing clips. Inspects existings clips afterwards. The download step is skipped.')
+        '-mec', '--metadata_existing_clips', required=False, default=False, type=boolean_string, help='Turns on MEC mode. Gets (M)etadata for all (E)xisting (C)lips. Inspects existings clips afterwards. The download step is skipped.')
 
     parser.add_argument(
         '-mecp', '--metadata_existing_clips_path', required=False, default=join('output_as_of_050221', 'audio_correct_names'), type=str, help='Path to the root of the clips folder, where the speaker_id folders are located.')
