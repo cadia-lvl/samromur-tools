@@ -19,7 +19,38 @@ Now you should be able to run train_accustic_model.py. You might however want to
 When training is done, the relevant output files will be moved to */modules/local* and are ready for use in verification.
 
 ## Verification
-All scripts regarding verification are located in */modules*. They are run using *runQC.py*. 
+All scripts regarding verification are located in */modules*. To start the verification, run *runQC.py*. The verification relies on the model trained in */training*.
+
+### Arguments
+You may want to tweak the arguments of *runQC.py* 
+
+## Configurations
+Before starting the training or verification process, make sure that everything is properly configured in *config.py*.
+- kaldi_root
+  - Default: `/opt/kaldi`
+  - Points to the Kaldi installation you intend to use.
+  - The local scripts use Kaldi for training and verification.
+- sample_rate
+  - Default: `16000`
+  - The sample rate of the audio data we are working with.
+  - Required for the data preparation stage in training.
+- recs
+  - Default: `/work/smarig/h1/samromur-data/as_of_050221/050221_audio_clips/audio_correct_names`
+  - Path to the audio recordings.
+  - Required in training for access to the training data.
+  - Required in verification for access to the data that needs the verification.
+- metadata
+  - Default: `/work/smarig/h1/samromur-data/as_of_050221/050221_metadata/metadata_all_clips_inspect_scored_normalized.tsv`
+  - Path to the metadata accompanying the audio recordings.
+  - Required in training to acquire the paths, filenames and normalized sentences of the recordings which are to be used for training.
+  - Required in verification to acquire id's, transcriptions, paths and filenames of the recordings to verify.
+- g2p_model
+  - Default: ``
+  - A path to the G2P model you intend to use to create a lexicon for the model training. 
+- model
+  - Default: `join(getcwd(), 'modules', 'local')`
+- reports_path
+  - Default: `join(getcwd(), 'reports')`
 
 ## Workload management
-Training models and especially verification of large batches of recordings can become quite time and resource consuming. If you are working on a Linux cluster, it is recommended that you use workload manager such as Slurm. If you are using Slurm, you can perform model training and verification using `train_accustic_model_slurm.sh` and `runQC_slurm.sh`, respectively. You can alter the Slurm parameters at will as well as tweak the Python script arguments in these bash scripts as needed.
+Training models and especially verification of large batches of recordings can become quite time and resource consuming. If you are working on a Linux cluster, it is recommended and encouraged that you use a workload manager such as Slurm. If you are using Slurm, you can perform model training and verification using `train_accustic_model_slurm.sh` and `runQC_slurm.sh`, respectively. You can alter the Slurm parameters at will as well as tweak the Python script arguments in these bash scripts as needed.
