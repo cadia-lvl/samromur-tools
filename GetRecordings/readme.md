@@ -15,8 +15,6 @@ The main goal of this tool is to enable developers to get large amounts of data 
   - [Authors/Credit](#authorscredit)
     - [Acknowledgements](#acknowledgements)
 
-<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
-
 
 ## Installation
 The following Python packages are required for this module:

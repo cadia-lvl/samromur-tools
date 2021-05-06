@@ -16,6 +16,7 @@ There are two objectives in this module.
   - [Configurations](#configurations)
   - [Installation](#installation)
   - [Workload management](#workload-management)
+  - [Authors/Credit](#authorscredit)
   - [Acknowledgements](#acknowledgements)
 
 ## Model training
@@ -95,6 +96,13 @@ They are also listed in requirements.txt. Therefore, you can easily install all 
 
 ## Workload management
 Training models and especially verification of large batches of recordings can become quite time and resource consuming. If you are working on a Linux cluster, it is recommended and encouraged that you use a workload manager such as Slurm. If you are using Slurm, you can perform model training and verification using `train_accustic_model_slurm.sh` and `runQC_slurm.sh`, respectively. You can alter the Slurm parameters at will as well as tweak the Python script arguments in these bash scripts as needed.
+
+## Authors/Credit
+Reykjavik University
+
+- David Erik Mollberg <david.e.mollberg@gmail.com>
+- Smári Freyr Guðmundsson <smarig@ru.is>
+
 
 ## Acknowledgements
 "This project was funded by the Language Technology Programme for Icelandic 2019-2023. The programme, which is managed and coordinated by [Almannarómur](https://almannaromur.is/), is funded by the Icelandic Ministry of Education, Science and Culture."
