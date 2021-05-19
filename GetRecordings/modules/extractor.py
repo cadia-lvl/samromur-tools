@@ -1,18 +1,16 @@
 from os.path import join, exists, getsize
 import pandas as pd
-import numpy as np
 import os
 from shutil import rmtree
 from datetime import date
 from tqdm import tqdm
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 import subprocess as sp
-import re
+import math
 
 from modules.database import S3, MySQL
-from modules.audio_tools import read_audio, get_duration, save_audio, detect_empty_waves
+from modules.audio_tools import read_audio, get_duration, detect_empty_waves
 from modules.mapping import age_mapping, gender_mapping, nationality_mapping, dialect_mapping
-from modules.create_speaker_ids import create_speaker_ids
 
 class Extractor:
     def __init__(self, args):
@@ -26,6 +24,8 @@ class Extractor:
         self.mec = args.metadata_existing_clips
         self.mec_filename = 'metadata_all_clips.tsv'      if self.mec else None
         self.mec_path = args.metadata_existing_clips_path if self.mec else None
+
+        self.update_path = args.update
         
         self.s3 = S3()
 
@@ -88,7 +88,46 @@ class Extractor:
         # Change each id to string appended with a newline before returning.
         return list(map(lambda x: str(x) + '\n', lis))
 
+    def update_metadata(self):
+        """Update mode: Using an existing metadata file, creates a new updated one with the newest clip validity information from the database."""
+
+        metadata = pd.read_csv(self.update_path, sep='\t', dtype=str)
+        metadata.set_index('id', inplace=True)
+
+        is_valid_new = self.sql.get_is_valid(list(map(lambda x: str(int(x)) + '\n', list(metadata.index))))
+        is_valid_new.set_index('id', inplace=True)
+        
+        print(f'Metadata entries: {len(metadata)}')
+        print(f'Database entries: {len(is_valid_new)}')
+
+        update_count:int = 0
+        for id in tqdm(metadata.index):
+            prev_value = metadata.at[id, 'is_valid']
+            new_value = str(is_valid_new.at[int(id), 'is_valid'])
+
+            # If the is_valid value of fetched data is 'nan', we capitalize it to 'NAN' so that it matches the value we use in the local metadata.
+            if math.isnan(float(new_value)):
+                new_value = 'NAN'
+
+            if prev_value != new_value:
+                metadata.at[id, 'is_valid'] = new_value
+                update_count += 1
+
+                with open('update_log.txt', 'a') as f_out:
+                    f_out.write(f'{id}\tOLD: {prev_value} - NEW: {new_value}\n')
+
+        file_name = f'{self.update_path.split("/")[-1][:-4]}_updated.tsv'
+
+        print(f'{update_count} records have been verified since last update')
+        print(f'Writing updated metadata to {file_name}...')
+        self.to_file(file_name, metadata)
+        return False
+
     def get_metadata(self):
+        if self.update_path != '':
+            print('Updating metadata file...')
+            return self.update_metadata()
+
         metadata = self.sql.get_all_data_about_clips()
         
         metadata['filename'] = 'NAN'

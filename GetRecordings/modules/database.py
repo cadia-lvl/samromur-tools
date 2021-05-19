@@ -28,6 +28,14 @@ class MySQL:
         self.cursor = self.db.cursor(dictionary=True)
         self.ids = ids_to_get
 
+    def get_is_valid(self, ids):
+        query = (f'SELECT id, is_valid \
+                   FROM clips          \
+                   WHERE id IN {*ids,}')
+        
+        self.cursor.execute(query)
+        return pd.DataFrame(self.cursor.fetchall())
+
     def get_all_data_about_clips(self):
         ids = self.ids
 
