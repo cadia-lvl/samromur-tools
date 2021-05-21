@@ -30,6 +30,9 @@ if __name__ == '__main__':
         '-mecp', '--metadata_existing_clips_path', required=False, default=join('output_as_of_050221', 'audio_correct_names'), type=str, help='Path to the root of the clips folder, where the speaker_id folders are located.')
 
     parser.add_argument(
+        '-u', '--update', required=False, default='', type=str, help='Update local metadata file with newest information about clips\' validity. No clips are downloaded.')        
+
+    parser.add_argument(
         '-t', '--threads', required=False, default='5', type=int, help='Number of threads to use when downloading')
     
     parser.add_argument(
@@ -47,4 +50,8 @@ if __name__ == '__main__':
     if extractor.get_metadata():
         extractor.download_clips()                                                                                                                                                 
         extractor.inspect_all_audio_files()
-        print('\nFinished')
+        print('\nFinished downloading of metadata, clips and inspection')
+    else:
+        print('\nFinished an alternative action')   # TODO: Specify which action
+
+# '/work/smarig/h1/samromur-data/as_of_050221/050221_metadata/metadata_all_clips_inspect_scored_normalized.tsv'
