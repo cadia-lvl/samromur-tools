@@ -7,6 +7,7 @@ from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
 import subprocess as sp
 import math
+from datetime import date
 
 from modules.database import S3, MySQL
 from modules.audio_tools import read_audio, get_duration, detect_empty_waves
@@ -286,7 +287,7 @@ class Extractor:
             # self.download_clips_parallel(row)     # Use this line for easier debug experience, by not using threads. Just remember to comment out the call to parallel_processor() below!
 
         with open('skipped.txt', 'w') as skipped:
-            skipped.write('already existing ids:\n')
+            skipped.write(f'already existing ids as of {date.today()}:\n')
 
         # parallel_processor() takes care of the rest along with download_clips_parallel().
         self.parallel_processor(self.download_clips_parallel, data, self.threads, chunks=250, units ='files')
