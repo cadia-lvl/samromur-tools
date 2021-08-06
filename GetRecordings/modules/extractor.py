@@ -307,7 +307,7 @@ class Extractor:
 
         # Only download missing files if set in arguments
         if self.download_only_missing:
-            new_file_path = f'{self.output_dir}/audio_correct_names/{row["speaker_id"]}/{new_filename}'
+            new_file_path = join(self.output_dir,"audio_correct_names",row["speaker_id"],new_filename)
             if exists(new_file_path):
                 try:
                     with open('skipped.txt', 'a') as skipped:
