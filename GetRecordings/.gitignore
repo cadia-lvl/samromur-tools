@@ -9,3 +9,6 @@ utils/oto/r1_fix/metadata_output
 update_logs
 
 update_log_*.txt
+
+output/*
+skipped.txt

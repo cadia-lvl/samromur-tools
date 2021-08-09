@@ -7,6 +7,7 @@ from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
 import subprocess as sp
 import math
+from datetime import date
 
 from modules.database import S3, MySQL
 from modules.audio_tools import read_audio, get_duration, detect_empty_waves
@@ -19,6 +20,7 @@ class Extractor:
         self.threads = args.threads
         self.overwrite = args.overwrite
         self.ids_to_get = args.ids
+        self.download_only_missing = args.download_only_missing
 
         # MEC mode variables.
         self.mec = args.metadata_existing_clips
@@ -284,6 +286,9 @@ class Extractor:
 
             # self.download_clips_parallel(row)     # Use this line for easier debug experience, by not using threads. Just remember to comment out the call to parallel_processor() below!
 
+        with open('skipped.txt', 'w') as skipped:
+            skipped.write(f'already existing ids as of {date.today()}:\n')
+
         # parallel_processor() takes care of the rest along with download_clips_parallel().
         self.parallel_processor(self.download_clips_parallel, data, self.threads, chunks=250, units ='files')
 
@@ -296,13 +301,25 @@ class Extractor:
         passes a single row of the data - which is fetched in download_clips() - to this function.
         '''
         
+        # The new filename, after downsampling, will be on the form speaker_id-id.wav
+        # Example: 012522-15233.wav
+        new_filename = row['speaker_id'] + '-' + str(row['id']).zfill(7) + '.wav'
+
+        # Only download missing files if set in arguments
+        if self.download_only_missing:
+            new_file_path = f'{self.output_dir}/audio_correct_names/{row["speaker_id"]}/{new_filename}'
+            if exists(new_file_path):
+                try:
+                    with open('skipped.txt', 'a') as skipped:
+                        skipped.write(f'{row["id"]}\n')
+                except IOError as e:
+                    print(e)
+                return
+
         # Download the audio clip from S3. It is initially very large and needs downsampling which is done in fix_header().
         # It also has a temporary filename (uuid) which is fixed during the downsampling process.
         uuid_filename = self.s3.get_object(join(self.output_dir, 'audio'), row['path'])
 
-        # The new filename, after downsampling, will be on the form speaker_id-id.wav
-        # Example: 012522-15233.wav
-        new_filename = row['speaker_id'] + '-' + str(row['id']).zfill(7) + '.wav'
 
         # Downsample the temporary file and copy the result to a new folder where all of the audio files are organised.
         self.fix_header(uuid_filename, row['speaker_id'], new_filename)

@@ -38,6 +38,10 @@ if __name__ == '__main__':
     parser.add_argument(
         '-or', '--overwrite', required=False, default=False, type=boolean_string, help='Overwrite the output folder')
 
+    parser.add_argument(
+        '-dom', '--download_only_missing', required=False, default=False, type=boolean_string, help='Checks if a clip exists before downloading it, only downloads missing clips'
+    )
+
     # TODO: Add arguments: -v --verbose         help='Print additional data as the script is running.'
     #                      -h --help            help='Some text about what this script does in general.'
     #                      -u --unfetched       help='Scan the database for unfetched data and download it.'
