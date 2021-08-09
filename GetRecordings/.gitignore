@@ -6,5 +6,6 @@ credentials.json
 misc/
 
 utils/oto/r1_fix/metadata_output
+update_logs
 
 update_log_*.txt
