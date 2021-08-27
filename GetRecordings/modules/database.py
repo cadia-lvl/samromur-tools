@@ -5,6 +5,8 @@ import mysql.connector as mysql
 import pandas as pd
 
 from utils.config import get_credentials
+from utils.age_groups import AgeGroups
+
 class S3:
     
     def __init__(self):
@@ -67,5 +69,22 @@ class MySQL:
         #query = ('SELECT * FROM clips where created_at > "2021-01-01"')
 
         self.cursor.execute(query)        
+        return self.cursor.fetchall()
+
+    def get_all_is_valid_ids(self, age=AgeGroups.ALL):
+        """
+        Retrieves all the ids that are valid for the input age group
+        and returns a list of them
+        """
+        if age == AgeGroups.ALL:
+            query = "SELECT id from clips WHERE is_valid = 1"
+        elif age == AgeGroups.ADULTS:
+            query = "SELECT id from clips WHERE is_valid = 1 and age not in (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,'barn','unglingur','ungur_unglingur')"
+        elif age == AgeGroups.TEENS:
+            query = "SELECT id from clips WHERE is_valid = 1 and age in (13,14,15,16,17,'unglingur','ungur_unglingur')"
+        elif age == (AgeGroups.KIDS):
+            query = "SELECT id from clips where is_valid = 1 and age in (1,2,3,4,5,6,7,8,9,10,11,12,'barn')"
+
+        self.cursor.execute(query)
         return self.cursor.fetchall()
         
