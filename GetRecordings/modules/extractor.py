@@ -62,6 +62,11 @@ class Extractor:
 
         # If the output folder exists, just carry on and do nothing.
         elif exists(self.output_dir):
+            # If audio folder does not exist, make a new empty one
+            if (~exists(join(self.output_dir, 'audio'))):
+                os.mkdir(join(self.output_dir, 'audio'))
+            if ~exists(join(self.output_dir, "audio_correct_names")):
+                os.mkdir(join(self.output_dir, 'audio_correct_names'))
             return
 
         # If the output folder does not exist, make a new empty one.
@@ -286,8 +291,9 @@ class Extractor:
 
             # self.download_clips_parallel(row)     # Use this line for easier debug experience, by not using threads. Just remember to comment out the call to parallel_processor() below!
 
-        with open('skipped.txt', 'w') as skipped:
-            skipped.write(f'already existing ids as of {date.today()}:\n')
+        if self.download_only_missing:
+            with open('skipped.txt', 'w') as skipped:
+                skipped.write(f'Already existing ids as of {date.today()}:\n')
 
         # parallel_processor() takes care of the rest along with download_clips_parallel().
         self.parallel_processor(self.download_clips_parallel, data, self.threads, chunks=250, units ='files')

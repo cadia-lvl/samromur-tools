@@ -42,6 +42,10 @@ if __name__ == '__main__':
         '-dom', '--download_only_missing', required=False, default=False, type=boolean_string, help='Checks if a clip exists before downloading it, only downloads missing clips'
     )
 
+    parser.add_argument(
+        "-om", "--only_get_metadata", required=False, default=False, type=boolean_string, help="Only get the metadatafile, skip all downloads."
+    )
+
     # TODO: Add arguments: -v --verbose         help='Print additional data as the script is running.'
     #                      -h --help            help='Some text about what this script does in general.'
     #                      -u --unfetched       help='Scan the database for unfetched data and download it.'
@@ -52,9 +56,10 @@ if __name__ == '__main__':
 
     # The download and inspection processes will not start unless the metadata is okay.
     if extractor.get_metadata():
-        extractor.download_clips()                                                                                                                                                 
-        extractor.inspect_all_audio_files()
-        print('\nFinished downloading of metadata, clips and inspection')
+        if not args.only_get_metadata:
+            extractor.download_clips()                                                                                                                                                 
+            extractor.inspect_all_audio_files()
+            print('\nFinished downloading of metadata, clips and inspection')
     else:
         print('\nFinished an alternative action')   # TODO: Specify which action
 
