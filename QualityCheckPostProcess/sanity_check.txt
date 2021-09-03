@@ -1,0 +1,27 @@
+score_group     status      score_range     votes(pos/neg/super)            empty       unalignable
+
+high            OKAY        x               x (all pos, no neg, no super)   x (none)    x (none)
+between         OKAY        x               x (no pos, no neg, no super)    x (none)    2 (should be 0*)
+low             OKAY        x               x (no pos, all neg, no super)   x (none)    x (none)
+low_unalignable OKAY        x               x (no pos, all neg, all super)  x (none)    x (all, 1132)
+zero            OKAY        x               x (no pos, all neg, all super)  x (none)    x (none)
+
+empty           OKAY        n/a**           x (no pos, all neg, all super)  x (all)     5 (***)  
+nonverified     OKAY        x               x (no pos, no neg, no super)    x (none)    x (none)
+
+*  These two had marosijo_score 0.30000000000000004 so they belong to this score group and we don't really care about if they are unalignable
+   if they are not in the low score group. So this can be ignored.
+
+** Should all be without scores because, preferably, Marosijo is only fed clips that are not marked empty. There were some however.
+   Out of all recordings, 64 were both empty but still somehow got Marosijo verified. Out of those 64, 41 clip was found to be be
+   still nonverified and requires vote by Marosijo, the other 23 have been manually verified. That is, the 41 clips are a part of the
+   46109 clips that require votes by Marosijo, the other 23 are a part of the 1386 which have been manually verified (see numbers in
+   stats_report.tsv). 
+   So, out of the 64 clips which are marked empty but have still been Marosijo verified, 23 have been manually verified and 41 still require
+   votes. They will, of course, be given negative super votes as they are marked as empty. Regardless of their Marosijo scores.
+
+   See: cut -f1,2,3,4,5,6,7,8 output_votes.tsv | awk -F" " '$5=="empty"' | cut -f8 | grep -v NAN | wc -l
+
+***They are all on the right range (0.01 - 0.3). They just happen to be marked as empty and empty clips are detected before unalignable clips
+   in the script. This does not matter as both get negative super votes. This does not neccessarily have to be fixed because an empty tag has 
+   a higher precedence than unalignable tags. An empty clip is definitely bad, so we don't really care if they are alignable or not.
