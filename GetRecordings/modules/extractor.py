@@ -96,14 +96,13 @@ class Extractor:
         metadata = pd.read_csv(self.update_path, sep='\t', dtype=str)
         metadata.set_index('id', inplace=True)
 
-        # Get df which contains all entries from db
+        # Get df which contains all entries from db with id and is_valid columns
         is_valid_new = self.sql.get_is_valid()
 
         # Filter them so we only get the same ones as we have in our metadata
-        is_valid_new = is_valid_new[is_valid_new['id'].isin(metadata.index)]
+        local_ids:list = list(map(lambda x: int(x), list(metadata.index)))
+        is_valid_new = is_valid_new[is_valid_new['id'].isin(local_ids)]
         is_valid_new.set_index('id', inplace=True)
-        
-        list(map(lambda x: str(int(x)) + '\n', list(metadata.index)))
 
         print(f'Metadata entries: {len(metadata)}')
         print(f'Database entries: {len(is_valid_new)}')
