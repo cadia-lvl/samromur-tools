@@ -30,10 +30,9 @@ class MySQL:
         self.cursor = self.db.cursor(dictionary=True)
         self.ids = ids_to_get
 
-    def get_is_valid(self, ids):
+    def get_is_valid(self):
         query = (f'SELECT id, is_valid \
-                   FROM clips          \
-                   WHERE id IN {*ids,}')
+                   FROM clips')
         
         self.cursor.execute(query)
         return pd.DataFrame(self.cursor.fetchall())

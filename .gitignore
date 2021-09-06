@@ -11,6 +11,7 @@ recordings/
 modules/local/
 modules/local_v1/
 QualityCheck/modules/local/
+QualityCheck/log/
 
 PrepMetadataFile/normalization/normalized_files
 

@@ -63,4 +63,4 @@ if __name__ == '__main__':
     else:
         print('\nFinished an alternative action')   # TODO: Specify which action
 
-# '/work/smarig/h1/samromur-data/as_of_050221/050221_metadata/metadata_all_clips_inspect_scored_normalized.tsv'
+# '/work/smarig/h1/samromur-data/as_of_050221/metadata_votes_since_190521.tsv'

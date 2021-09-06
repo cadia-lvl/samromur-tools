@@ -101,26 +101,31 @@ class Extractor:
         metadata = pd.read_csv(self.update_path, sep='\t', dtype=str)
         metadata.set_index('id', inplace=True)
 
-        is_valid_new = self.sql.get_is_valid(list(map(lambda x: str(int(x)) + '\n', list(metadata.index))))
+        # Get df which contains all entries from db with id and is_valid columns
+        is_valid_new = self.sql.get_is_valid()
+
+        # Filter them so we only get the same ones as we have in our metadata
+        local_ids:list = list(map(lambda x: int(x), list(metadata.index)))
+        is_valid_new = is_valid_new[is_valid_new['id'].isin(local_ids)]
         is_valid_new.set_index('id', inplace=True)
-        
+
         print(f'Metadata entries: {len(metadata)}')
         print(f'Database entries: {len(is_valid_new)}')
 
-        update_count:int = 0
-        for id in tqdm(metadata.index):
-            prev_value = metadata.at[id, 'is_valid']
-            new_value = str(is_valid_new.at[int(id), 'is_valid'])
+        with open('update_log.txt', 'a') as f_out:
+            update_count:int = 0
+            for id in tqdm(metadata.index):
+                prev_value = metadata.at[id, 'is_valid']
+                new_value = str(is_valid_new.at[int(id), 'is_valid'])
 
-            # If the is_valid value of fetched data is 'nan', we capitalize it to 'NAN' so that it matches the value we use in the local metadata.
-            if math.isnan(float(new_value)):
-                new_value = 'NAN'
+                # If the is_valid value of fetched data is 'nan', we capitalize it to 'NAN' so that it matches the value we use in the local metadata.
+                if math.isnan(float(new_value)):
+                    new_value = 'NAN'
 
-            if prev_value != new_value:
-                metadata.at[id, 'is_valid'] = new_value
-                update_count += 1
+                if prev_value != new_value:
+                    metadata.at[id, 'is_valid'] = new_value
+                    update_count += 1
 
-                with open('update_log.txt', 'a') as f_out:
                     f_out.write(f'{id}\tOLD: {prev_value} - NEW: {new_value}\n')
 
         file_name = f'{self.update_path.split("/")[-1][:-4]}_updated.tsv'
