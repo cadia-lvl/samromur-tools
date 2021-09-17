@@ -1,13 +1,3 @@
-""" 
-1. [x] Update vote information in main metadata file
-2. [] Run this script
-3. [] Put number of manually verified clips into Venn diagrams
-4. [] Add machine_verified boolean column to metadata
-5. [] Add votes to database
-6. [] Update local metadata
-7. [] Write report
-"""
-
 from collections import defaultdict
 from os.path import exists
 from os import remove
